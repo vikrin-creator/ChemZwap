@@ -27,7 +27,7 @@ const Navbar = () => {
                         <img
                             src="/logo.png"
                             alt="ChemZwap Logo"
-                            className="h-10 w-auto group-hover:scale-110 transition-transform"
+                            className="h-16 w-auto group-hover:scale-110 transition-transform"
                         />
                         {/* <span className="text-xl md:text-2xl font-bold font-['Outfit'] bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
                             ChemZwap

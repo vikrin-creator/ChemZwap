@@ -22,7 +22,7 @@ const Footer = () => {
                             <img
                                 src="/logo.png"
                                 alt="ChemZwap Logo"
-                                className="h-12 w-auto"
+                                className="h-20 w-auto"
                             />
                         </div>
                         <p className="text-sm leading-relaxed">
