@@ -36,7 +36,7 @@ jobs:
         username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./dist/
-        server-dir: /domains/aqua-hamster-125991.hostingersite.com/public_html/
+        server-dir: /public_html/
         protocol: ftp
         port: 21
         timeout: 600000
