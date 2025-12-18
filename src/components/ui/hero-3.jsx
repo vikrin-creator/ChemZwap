@@ -57,7 +57,7 @@ export const AnimatedMarqueeHero = ({
     return (
         <section
             className={cn(
-                "relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-center text-center px-4 py-20",
+                "relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-center text-center px-4 pt-20 pb-20 -mt-20",
                 className
             )}
         >
