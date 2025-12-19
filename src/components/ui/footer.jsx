@@ -20,7 +20,7 @@ const Footer = () => {
                     <div className="space-y-4">
                         <div className="flex items-center space-x-2">
                             <img
-                                src="/logo.png"
+                                src="/CHEMZWAP HEADER.png"
                                 alt="ChemZwap Logo"
                                 className="h-20 w-auto"
                             />
