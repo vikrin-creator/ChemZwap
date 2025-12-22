@@ -1,34 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Beaker, ChevronRight, CheckCircle } from 'lucide-react';
+import { Search, Beaker } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { categoryData } from '../data/categories';
+import { productsData } from '../data/products';
 
 const Products = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Filter products based on search query
+    const filteredProducts = productsData.filter(product =>
+        product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.synonyms.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.casNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.einecs.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="bg-white min-h-screen">
-            {/* Hero Section */}
-            <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-white to-primary-50/30">
-                <div className="max-w-7xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <div className="inline-flex items-center justify-center p-4 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl mb-6">
-                            <Beaker className="h-12 w-12 text-white" />
-                        </div>
-                        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 font-['Outfit']">
-                            Browse <span className="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Products</span>
-                        </h1>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                            Explore our comprehensive catalog of quality chemicals, reagents, and laboratory supplies
-                        </p>
-                    </motion.div>
-                </div>
-            </section>
 
             {/* Search Bar */}
             <section className="py-8 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
@@ -40,7 +28,7 @@ const Products = () => {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search for chemicals, CAS numbers, or categories..."
+                                placeholder="Search by product name, CAS number, or synonyms..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
@@ -54,7 +42,7 @@ const Products = () => {
                 </div>
             </section>
 
-            {/* Main Categories Grid */}
+            {/* Products Grid */}
             <section className="py-16 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
@@ -64,61 +52,64 @@ const Products = () => {
                         className="mb-12"
                     >
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-['Outfit']">
-                            Explore by Category
+                            Our Products
                         </h2>
-                        <p className="text-gray-600">Find the right products for your needs</p>
+                        <p className="text-gray-600">Showing {filteredProducts.length} products</p>
                     </motion.div>
 
-                    {/* Category Cards */}
+                    {/* Product Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {categoryData.map((category, index) => (
+                        {filteredProducts.map((product, index) => (
                             <motion.div
-                                key={category.id}
+                                key={product.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={{ delay: index * 0.05 }}
                                 className="group"
                             >
-                                {/* Category Card - Matching Reference Design */}
-                                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+                                {/* Product Card */}
+                                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-100">
                                     {/* Image Section */}
                                     <div className="relative h-52 overflow-hidden">
                                         <img
-                                            src={category.image}
-                                            alt={category.name}
+                                            src={product.image}
+                                            alt={product.productName}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
                                     </div>
 
                                     {/* Content Section */}
                                     <div className="p-6 flex-1 flex flex-col">
-                                        {/* Title */}
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-4 font-['Outfit']">
-                                            {category.name}
+                                        {/* Product Name */}
+                                        <h3 className="text-xl font-bold text-gray-900 mb-4 font-['Outfit'] line-clamp-2">
+                                            {product.productName}
                                         </h3>
 
-                                        {/* Bullet Points with Checkmarks */}
-                                        <div className="space-y-3 mb-4 flex-1">
-                                            {category.subcategories.slice(0, 2).map((subcat, idx) => (
-                                                <div key={idx} className="flex items-start gap-2">
-                                                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                                    <span className="text-gray-600 text-sm leading-relaxed">
-                                                        {subcat.name} - {subcat.childCategories.slice(0, 2).join(', ')}.
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        {/* Product Details */}
+                                        <div className="space-y-3 mb-6 flex-1">
+                                            {/* Synonyms */}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Synonyms</span>
+                                                <span className="text-sm text-gray-700 line-clamp-2">{product.synonyms}</span>
+                                            </div>
 
-                                        {/* Description */}
-                                        <p className="text-gray-600 text-sm mb-6">
-                                            <span className="font-semibold text-gray-800">Overview: </span>
-                                            {category.description}
-                                        </p>
+                                            {/* CAS Number */}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">CAS Number</span>
+                                                <span className="text-sm text-gray-900 font-mono font-medium">{product.casNumber}</span>
+                                            </div>
+
+                                            {/* Einecs */}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Einecs</span>
+                                                <span className="text-sm text-gray-900 font-mono font-medium">{product.einecs}</span>
+                                            </div>
+                                        </div>
 
                                         {/* Enquire Now Button */}
                                         <Link
-                                            to={`/products/${category.id}`}
+                                            to={`/product/${product.id}`}
                                             className="w-full bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold py-3.5 px-6 rounded-xl text-center transition-all duration-300 hover:shadow-lg"
                                         >
                                             Enquire Now
@@ -128,6 +119,15 @@ const Products = () => {
                             </motion.div>
                         ))}
                     </div>
+
+                    {/* No Results Message */}
+                    {filteredProducts.length === 0 && (
+                        <div className="text-center py-16">
+                            <Beaker className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
+                            <p className="text-gray-500">Try adjusting your search terms</p>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -145,20 +145,12 @@ const Products = () => {
                         <p className="text-xl text-primary-100 mb-8">
                             Contact our team for custom inquiries or special requests
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link
-                                to="/product/140732"
-                                className="px-8 py-4 bg-white text-primary-600 font-semibold rounded-full hover:shadow-xl hover:scale-105 transition-all"
-                            >
-                                View Sample Product
-                            </Link>
-                            <Link
-                                to="/contact"
-                                className="px-8 py-4 bg-primary-800 text-white font-semibold rounded-full border-2 border-white hover:shadow-xl hover:scale-105 transition-all"
-                            >
-                                Contact Us
-                            </Link>
-                        </div>
+                        <Link
+                            to="/contact"
+                            className="px-8 py-4 bg-white text-primary-600 font-semibold rounded-full hover:shadow-xl hover:scale-105 transition-all inline-block"
+                        >
+                            Contact Us
+                        </Link>
                     </motion.div>
                 </div>
             </section>
@@ -167,3 +159,4 @@ const Products = () => {
 };
 
 export default Products;
+
