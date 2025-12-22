@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Beaker, ChevronRight } from 'lucide-react';
+import { Search, Beaker, ChevronRight, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { categoryData } from '../data/categories';
 
 const Products = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [expandedCategory, setExpandedCategory] = useState(null);
 
     return (
         <div className="bg-white min-h-screen">
@@ -79,75 +78,53 @@ const Products = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className="group cursor-pointer"
-                                onClick={() => setExpandedCategory(expandedCategory === category.id ? null : category.id)}
+                                className="group"
                             >
-                                {/* Category Card */}
-                                <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-white border border-gray-200 hover:border-primary-300">
-                                    {/* Image */}
-                                    <div className="relative h-56 overflow-hidden">
+                                {/* Category Card - Matching Reference Design */}
+                                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+                                    {/* Image Section */}
+                                    <div className="relative h-52 overflow-hidden">
                                         <img
                                             src={category.image}
                                             alt={category.name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-gray-900/20 to-transparent"></div>
-                                        <div className="absolute bottom-4 left-4 right-4">
-                                            <h3 className="text-2xl font-bold text-white mb-1 font-['Outfit']">
-                                                {category.name}
-                                            </h3>
-                                        </div>
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="p-6">
-                                        <p className="text-gray-600 mb-4 leading-relaxed">
-                                            {category.description}
-                                        </p>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm font-semibold text-primary-600">
-                                                {category.subcategories.length} Subcategories
-                                            </span>
-                                            <ChevronRight className={`h-5 w-5 text-primary-600 transition-transform ${expandedCategory === category.id ? 'rotate-90' : ''}`} />
-                                        </div>
-                                    </div>
-                                </div>
+                                    {/* Content Section */}
+                                    <div className="p-6 flex-1 flex flex-col">
+                                        {/* Title */}
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-4 font-['Outfit']">
+                                            {category.name}
+                                        </h3>
 
-                                {/* Expanded Subcategories */}
-                                {expandedCategory === category.id && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className="mt-4 bg-gradient-to-br from-primary-50 to-white rounded-xl border border-primary-200 p-6 shadow-md"
-                                    >
-                                        <h4 className="text-lg font-bold text-gray-900 mb-4 font-['Outfit']">
-                                            Subcategories
-                                        </h4>
-                                        <div className="space-y-4">
-                                            {category.subcategories.map((subcat) => (
-                                                <div key={subcat.id} className="border-b border-primary-100 last:border-0 pb-4 last:pb-0">
-                                                    <h5 className="font-semibold text-primary-900 mb-2 flex items-center space-x-2">
-                                                        <span className="h-2 w-2 bg-primary-500 rounded-full"></span>
-                                                        <span>{subcat.name}</span>
-                                                    </h5>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 ml-4">
-                                                        {subcat.childCategories.map((child, idx) => (
-                                                            <Link
-                                                                key={idx}
-                                                                to={`/products/${category.id}/${subcat.id}/${child.toLowerCase().replace(/\s+/g, '-')}`}
-                                                                className="text-sm text-gray-700 hover:text-primary-600 transition-colors flex items-start space-x-1"
-                                                            >
-                                                                <ChevronRight className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                                                <span>{child}</span>
-                                                            </Link>
-                                                        ))}
-                                                    </div>
+                                        {/* Bullet Points with Checkmarks */}
+                                        <div className="space-y-3 mb-4 flex-1">
+                                            {category.subcategories.slice(0, 2).map((subcat, idx) => (
+                                                <div key={idx} className="flex items-start gap-2">
+                                                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                                    <span className="text-gray-600 text-sm leading-relaxed">
+                                                        {subcat.name} - {subcat.childCategories.slice(0, 2).join(', ')}.
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
-                                    </motion.div>
-                                )}
+
+                                        {/* Description */}
+                                        <p className="text-gray-600 text-sm mb-6">
+                                            <span className="font-semibold text-gray-800">Overview: </span>
+                                            {category.description}
+                                        </p>
+
+                                        {/* Enquire Now Button */}
+                                        <Link
+                                            to={`/products/${category.id}`}
+                                            className="w-full bg-[#1e3a5f] hover:bg-[#152a45] text-white font-semibold py-3.5 px-6 rounded-xl text-center transition-all duration-300 hover:shadow-lg"
+                                        >
+                                            Enquire Now
+                                        </Link>
+                                    </div>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
