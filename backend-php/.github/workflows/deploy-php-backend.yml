@@ -1,0 +1,44 @@
+name: Deploy PHP Backend to Hostinger
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'backend-php/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        
+    - name: Install Composer dependencies
+      run: |
+        cd backend-php
+        composer install --no-dev --optimize-autoloader --prefer-dist
+        
+    - name: Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.HOSTINGER_FTP_SERVER }}
+        username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+        password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        local-dir: ./backend-php/
+        server-dir: /public_html/api/
+        protocol: ftp
+        port: 21
+        timeout: 600000
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/composer.lock

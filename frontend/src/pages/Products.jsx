@@ -1,18 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Beaker } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { productsData } from '../data/products';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 
 const Products = () => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/products`);
+                const data = await response.json();
+                if (data.success) {
+                    // Map API response to expected format
+                    const mappedProducts = data.data.map(p => {
+                        // Handle image URL - use placeholder if no image
+                        let imageUrl = p.image;
+
+                        // If no image or empty string, use placeholder
+                        if (!imageUrl || imageUrl.trim() === '') {
+                            imageUrl = 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=800&h=600&fit=crop';
+                        }
+                        // If it's a local path, prepend API_URL
+                        else if (imageUrl.startsWith('/uploads')) {
+                            imageUrl = `${API_URL}${imageUrl}`;
+                        }
+
+                        return {
+                            id: p.id.toString(),
+                            productName: p.product_name,
+                            synonyms: p.synonyms || '',
+                            casNumber: p.cas_number || '',
+                            einecs: p.einecs || '',
+                            image: imageUrl,
+                            category: p.category || ''
+                        };
+                    });
+                    setProducts(mappedProducts);
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     // Filter products based on search query
-    const filteredProducts = productsData.filter(product =>
-        product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.synonyms.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.casNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.einecs.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredProducts = products.filter(product =>
+        product.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.synonyms?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.casNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.einecs?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -76,6 +122,10 @@ const Products = () => {
                                             src={product.image}
                                             alt={product.productName}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            onError={(e) => {
+                                                e.target.onerror = null; // Prevent infinite loop
+                                                e.target.src = 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=800&h=600&fit=crop';
+                                            }}
                                         />
                                     </div>
 

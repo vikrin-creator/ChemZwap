@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
-import { getProductById } from '../data/products';
+
+const API_URL = 'http://127.0.0.1:5000';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -13,23 +14,55 @@ const ProductDetail = () => {
         email: '',
         mobile: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState(null);
 
-    // Load product data based on ID
+    // Load product data from API
     useEffect(() => {
-        const productData = getProductById(id);
-        if (productData) {
-            setProduct(productData);
-        } else {
-            // Fallback to a default product if ID not found
-            setProduct({
-                id: id,
-                productName: 'Product Not Found',
-                synonyms: 'N/A',
-                casNumber: 'N/A',
-                einecs: 'N/A',
-                image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
-            });
-        }
+        const fetchProduct = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/products/${id}`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    // Handle image URL - prepend API_URL if it's a local path
+                    let imageUrl = data.data.image || '';
+                    if (imageUrl && imageUrl.startsWith('/uploads')) {
+                        imageUrl = `${API_URL}${imageUrl}`;
+                    } else if (!imageUrl) {
+                        imageUrl = 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80';
+                    }
+                    setProduct({
+                        id: data.data.id.toString(),
+                        productName: data.data.product_name,
+                        synonyms: data.data.synonyms || 'N/A',
+                        casNumber: data.data.cas_number || 'N/A',
+                        einecs: data.data.einecs || 'N/A',
+                        image: imageUrl,
+                    });
+                } else {
+                    // Product not found
+                    setProduct({
+                        id: id,
+                        productName: 'Product Not Found',
+                        synonyms: 'N/A',
+                        casNumber: 'N/A',
+                        einecs: 'N/A',
+                        image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                setProduct({
+                    id: id,
+                    productName: 'Error Loading Product',
+                    synonyms: 'N/A',
+                    casNumber: 'N/A',
+                    einecs: 'N/A',
+                    image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
+                });
+            }
+        };
+        fetchProduct();
     }, [id]);
 
     const handleInputChange = (e) => {
@@ -40,11 +73,49 @@ const ProductDetail = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // Handle form submission here
-        alert('Enquiry submitted successfully!');
+        setIsSubmitting(true);
+        setSubmitStatus(null);
+
+        try {
+            const response = await fetch(`${API_URL}/api/enquiries`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customer_name: formData.name,
+                    company_name: formData.companyName,
+                    gstin: formData.gstin,
+                    email: formData.email,
+                    mobile: formData.mobile,
+                    product_id: product?.id,
+                    product_name: product?.productName
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setSubmitStatus('success');
+                // Reset form
+                setFormData({
+                    name: '',
+                    companyName: '',
+                    gstin: '',
+                    email: '',
+                    mobile: ''
+                });
+            } else {
+                setSubmitStatus('error');
+            }
+        } catch (error) {
+            console.error('Error submitting enquiry:', error);
+            setSubmitStatus('error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Show loading state while product data is being fetched
@@ -230,12 +301,42 @@ const ProductDetail = () => {
                         {/* Submit Button */}
                         <motion.button
                             type="submit"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                            disabled={isSubmitting}
+                            whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                            whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                            className={`w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg flex items-center justify-center space-x-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            Enquire Now
+                            {isSubmitting ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    <span>Submitting...</span>
+                                </>
+                            ) : (
+                                <span>Enquire Now</span>
+                            )}
                         </motion.button>
+
+                        {/* Success Message */}
+                        {submitStatus === 'success' && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-center"
+                            >
+                                ✓ Thank you! Your enquiry has been submitted successfully. We'll get back to you soon.
+                            </motion.div>
+                        )}
+
+                        {/* Error Message */}
+                        {submitStatus === 'error' && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-center"
+                            >
+                                ✕ Something went wrong. Please try again or contact us directly.
+                            </motion.div>
+                        )}
                     </form>
                 </motion.div>
             </div>
