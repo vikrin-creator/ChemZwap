@@ -15,11 +15,8 @@ const Products = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                // Try static JSON first (for Website Builder), fallback to PHP API
-                let response = await fetch('/api/products.json');
-                if (!response.ok) {
-                    response = await fetch(`${API_URL}/api/products`);
-                }
+                // Fetch from PHP API
+                const response = await fetch(`${API_URL}/api/products`);
                 const data = await response.json();
                 if (data.success) {
                     // Map API response to expected format
