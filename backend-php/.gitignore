@@ -1,5 +1,5 @@
 # Ignore environment file (contains sensitive data)
-.env
+# .env
 
 # Composer
 /vendor/
