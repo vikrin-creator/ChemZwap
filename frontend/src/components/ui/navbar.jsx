@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Beaker, ChevronDown } from 'lucide-react';
+import { Menu, X, Beaker } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { categoryData } from '../../data/categories';
 
 const Navbar = () => {
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
 
     const navLinks = [
         { name: 'Home', path: '/' },
@@ -29,9 +27,6 @@ const Navbar = () => {
                             alt="ChemZwap Logo"
                             className="h-16 w-auto group-hover:scale-110 transition-transform"
                         />
-                        {/* <span className="text-xl md:text-2xl font-bold font-['Outfit'] bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
-                            ChemZwap
-                        </span> */}
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -52,62 +47,12 @@ const Navbar = () => {
                             About
                         </Link>
 
-                        {/* Products with Categories Dropdown */}
-                        <div
-                            className="relative group"
-                            onMouseEnter={() => setShowCategoriesDropdown(true)}
-                            onMouseLeave={() => setShowCategoriesDropdown(false)}
+                        <Link
+                            to="/products"
+                            className={`font-medium transition-colors ${location.pathname === '/products' ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'}`}
                         >
-                            <Link
-                                to="/products"
-                                className={`font-medium transition-colors flex items-center space-x-1 ${location.pathname === '/products' ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'}`}
-                            >
-                                <span>Products</span>
-                                <ChevronDown className={`h-4 w-4 transition-transform ${showCategoriesDropdown ? 'rotate-180' : ''}`} />
-                            </Link>
-
-                            {/* Dropdown Menu */}
-                            {showCategoriesDropdown && (
-                                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 py-4 z-50">
-                                    <div className="px-4 pb-2 border-b border-gray-200">
-                                        <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide">Browse Categories</h3>
-                                    </div>
-                                    <div className="py-2">
-                                        {categoryData.map((category) => (
-                                            <Link
-                                                key={category.id}
-                                                to="/products"
-                                                className="flex items-center space-x-3 px-4 py-3 hover:bg-primary-50 transition-colors group/item"
-                                            >
-                                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                                    <img
-                                                        src={category.image}
-                                                        alt={category.name}
-                                                        className="w-full h-full object-cover group-hover/item:scale-110 transition-transform"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-semibold text-gray-900 group-hover/item:text-primary-600 transition-colors text-sm">
-                                                        {category.name}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 truncate">
-                                                        {category.subcategories.length} subcategories
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                    <div className="px-4 pt-2 border-t border-gray-200">
-                                        <Link
-                                            to="/products"
-                                            className="block text-center text-sm font-semibold text-primary-600 hover:text-primary-700 py-2"
-                                        >
-                                            View All Products →
-                                        </Link>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                            Products
+                        </Link>
 
                         <Link
                             to="/contact"
