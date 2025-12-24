@@ -3,10 +3,17 @@ import { toast } from 'react-hot-toast';
 import adminApi from '../services/api';
 import BottomNav from '../components/BottomNav';
 
+import ConfirmationModal from '../components/ConfirmationModal';
+
 const Enquiries = () => {
     const [enquiries, setEnquiries] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Delete Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedEnquiryId, setSelectedEnquiryId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchEnquiries();
@@ -36,16 +43,27 @@ const Enquiries = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this enquiry?')) return;
+    // Open delete modal
+    const confirmDelete = (id) => {
+        setSelectedEnquiryId(id);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!selectedEnquiryId) return;
 
         try {
-            await adminApi.enquiries.delete(id);
+            setIsDeleting(true);
+            await adminApi.enquiries.delete(selectedEnquiryId);
             toast.success('Enquiry deleted successfully');
             fetchEnquiries();
+            setDeleteModalOpen(false);
         } catch (error) {
             console.error('Error deleting enquiry:', error);
             toast.error('Failed to delete enquiry');
+        } finally {
+            setIsDeleting(false);
+            setSelectedEnquiryId(null);
         }
     };
 
@@ -176,7 +194,7 @@ const Enquiries = () => {
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
                                             <button
-                                                onClick={() => handleDelete(enquiry.id)}
+                                                onClick={() => confirmDelete(enquiry.id)}
                                                 className="text-red-400 hover:text-red-300 transition-colors"
                                                 title="Delete"
                                             >
@@ -193,6 +211,15 @@ const Enquiries = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="Delete Enquiry"
+                message="Are you sure you want to delete this enquiry? This action cannot be undone."
+                isLoading={isDeleting}
+            />
 
             <BottomNav />
         </div>
