@@ -34,6 +34,33 @@ if (strpos($route, 'auth') === 0) {
 } elseif ($route === 'health' || $route === 'api/health') {
     // Health check
     echo json_encode(['status' => 'ok', 'timestamp' => date('c')]);
+} elseif ($route === 'test-db') {
+    // Database connection test
+    header('Content-Type: application/json');
+    try {
+        require_once __DIR__ . '/config.php';
+        require_once __DIR__ . '/database.php';
+        
+        $db = Database::getInstance();
+        $stmt = $db->query("SELECT COUNT(*) as count FROM products");
+        $result = $stmt->fetch();
+        
+        echo json_encode([
+            'status' => 'ok',
+            'db_host' => DB_HOST,
+            'db_name' => DB_NAME,
+            'products_count' => $result['count']
+        ]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'db_host' => defined('DB_HOST') ? DB_HOST : 'not defined',
+            'db_name' => defined('DB_NAME') ? DB_NAME : 'not defined'
+        ]);
+    }
+    exit;
 } else {
     http_response_code(404);
     echo json_encode(['message' => 'Route not found', 'route' => $route]);
