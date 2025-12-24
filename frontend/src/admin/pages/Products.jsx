@@ -3,13 +3,20 @@ import { toast } from 'react-hot-toast';
 import adminApi from '../services/api';
 import BottomNav from '../components/BottomNav';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import ConfirmationModal from '../components/ConfirmationModal';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+
+    // Delete Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const [editingProduct, setEditingProduct] = useState(null);
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
@@ -106,15 +113,27 @@ const Products = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this product?')) return;
+    // Open delete modal
+    const confirmDelete = (id) => {
+        setSelectedProductId(id);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!selectedProductId) return;
+
         try {
-            await adminApi.products.delete(id);
+            setIsDeleting(true);
+            await adminApi.products.delete(selectedProductId);
             toast.success('Product deleted successfully');
             fetchProducts();
+            setDeleteModalOpen(false);
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Failed to delete product');
+        } finally {
+            setIsDeleting(false);
+            setSelectedProductId(null);
         }
     };
 
@@ -199,7 +218,7 @@ const Products = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </button>
-                                                <button onClick={() => handleDelete(product.id)} className="text-red-400 hover:text-red-300" title="Delete">
+                                                <button onClick={() => confirmDelete(product.id)} className="text-red-400 hover:text-red-300" title="Delete">
                                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -310,6 +329,15 @@ const Products = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="Delete Product"
+                message="Are you sure you want to delete this product? This action cannot be undone."
+                isLoading={isDeleting}
+            />
 
             <BottomNav />
         </div>
