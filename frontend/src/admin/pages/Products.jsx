@@ -59,13 +59,19 @@ const Products = () => {
                 submitData.append('image', imageFile);
             }
 
+            // For updates, add method override since PHP doesn't parse FormData for PUT
+            if (editingProduct) {
+                submitData.append('_method', 'PUT');
+            }
+
             const token = localStorage.getItem('adminToken');
             const url = editingProduct
                 ? `${API_URL}/api/products/${editingProduct.id}`
                 : `${API_URL}/api/products`;
 
+            // Always use POST for FormData (PHP can parse POST but not PUT FormData)
             const response = await fetch(url, {
-                method: editingProduct ? 'PUT' : 'POST',
+                method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: submitData
             });

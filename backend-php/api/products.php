@@ -5,6 +5,13 @@ require_once __DIR__ . '/../auth.php';
 
 $db = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Support for _method override (since PHP doesn't parse FormData for PUT/DELETE)
+// This allows us to use POST with _method=PUT for updates
+if ($method === 'POST' && isset($_POST['_method'])) {
+    $method = strtoupper($_POST['_method']);
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 // Get the route
@@ -131,55 +138,15 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
 
         $productId = $parts[1];
         
-        // Handle both JSON and FormData
-        $name = '';
-        $synonyms = null;
-        $casNumber = null;
-        $einecs = null;
-        $category = null;
+        // With _method override, data comes from $_POST
+        $name = $_POST['productName'] ?? $_POST['name'] ?? '';
+        $synonyms = $_POST['synonyms'] ?? null;
+        $casNumber = $_POST['casNumber'] ?? $_POST['cas_number'] ?? null;
+        $einecs = $_POST['einecs'] ?? null;
+        $category = $_POST['category'] ?? null;
 
-        // Check if it's FormData or JSON
-        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-        
-        // For PUT requests, PHP doesn't populate $_POST, so we need to parse manually
-        if (strpos($contentType, 'multipart/form-data') !== false) {
-            // Parse multipart/form-data for PUT request
-            // Note: PHP doesn't parse this automatically for PUT, only for POST
-            // We'll read from $_POST first (in case it's there), otherwise parse the raw input
-            
-            // Try $_POST first (won't work for real PUT, but might work if method is overridden)
-            if (!empty($_POST)) {
-                $name = $_POST['productName'] ?? $_POST['name'] ?? '';
-                $synonyms = $_POST['synonyms'] ?? null;
-                $casNumber = $_POST['casNumber'] ?? $_POST['cas_number'] ?? null;
-                $einecs = $_POST['einecs'] ?? null;
-                $category = $_POST['category'] ?? null;
-            } else {
-                // For real PUT requests with FormData, we need to manually parse
-                // This is complex, so for now we'll log and use JSON fallback
-                error_log("PUT request with multipart/form-data detected - data: " . print_r($_POST, true));
-                
-                // Fallback to trying to parse as JSON
-                $rawInput = file_get_contents('php://input');
-                $jsonData = json_decode($rawInput, true);
-                if ($jsonData) {
-                    $name = $jsonData['productName'] ?? $jsonData['name'] ?? '';
-                    $synonyms = $jsonData['synonyms'] ?? null;
-                    $casNumber = $jsonData['casNumber'] ?? $jsonData['cas_number'] ?? null;
-                    $einecs = $jsonData['einecs'] ?? null;
-                    $category = $jsonData['category'] ?? null;
-                }
-            }
-        } else if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
-            // Parse URL-encoded data
-            parse_str(file_get_contents('php://input'), $putData);
-            $name = $putData['productName'] ?? $putData['name'] ?? '';
-            $synonyms = $putData['synonyms'] ?? null;
-            $casNumber = $putData['casNumber'] ?? $putData['cas_number'] ?? null;
-            $einecs = $putData['einecs'] ?? null;
-            $category = $putData['category'] ?? null;
-        } else {
-            // Handle JSON (default)
+        // Fallback to JSON input if $_POST is empty (for non-FormData requests)
+        if (empty($name) && $input) {
             $name = $input['productName'] ?? $input['name'] ?? '';
             $synonyms = $input['synonyms'] ?? null;
             $casNumber = $input['casNumber'] ?? $input['cas_number'] ?? null;
