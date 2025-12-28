@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
 
@@ -30,6 +31,7 @@ const Products = () => {
 
     useEffect(() => {
         fetchProducts();
+        fetchCategories();
     }, []);
 
     const fetchProducts = async () => {
@@ -42,6 +44,15 @@ const Products = () => {
             toast.error('Failed to load products');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await adminApi.categories.getAll();
+            setCategories(response.data?.data || []);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
         }
     };
 
@@ -307,10 +318,9 @@ const Products = () => {
                                     className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
                                 >
                                     <option value="">Select category</option>
-                                    <option value="organic-chemistry">Organic Chemistry</option>
-                                    <option value="inorganic-chemistry">Inorganic Chemistry</option>
-                                    <option value="analytical-chemistry">Analytical Chemistry</option>
-                                    <option value="biotechnology">Biotechnology</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="flex gap-3 pt-4">
