@@ -33,6 +33,7 @@ const Navbar = () => {
     { path: "/admin", label: "Dashboard", icon: "📊" },
     { path: "/admin/enquiries", label: "Enquiries", icon: "📩" },
     { path: "/admin/products", label: "Products", icon: "📦" },
+    { path: "/admin/categories", label: "Category", icon: "🏷️" },
   ];
 
   return (

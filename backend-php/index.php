@@ -29,6 +29,8 @@ if (strpos($route, 'auth') === 0) {
     require_once __DIR__ . '/api/products.php';
 } elseif (strpos($route, 'enquiries') === 0) {
     require_once __DIR__ . '/api/enquiries.php';
+} elseif (strpos($route, 'categories') === 0) {
+    require_once __DIR__ . '/api/categories.php';
 } elseif (strpos($route, 'dashboard') === 0) {
     require_once __DIR__ . '/api/dashboard.php';
 } elseif ($route === 'health' || $route === 'api/health') {

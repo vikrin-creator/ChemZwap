@@ -10,7 +10,6 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,  // Important for sending cookies with cross-origin requests
   timeout: 30000,  // 30 seconds timeout
 });
 // Add request interceptor to include auth token
@@ -326,6 +325,15 @@ const adminApi = {
     getAll: () => api.get('/api/enquiries'),
     updateStatus: (id, status) => api.put(`/api/enquiries/${id}/status`, { status }),
     delete: (id) => api.delete(`/api/enquiries/${id}`)
+  },
+
+  // Categories
+  categories: {
+    getAll: () => api.get('/api/categories'),
+    getById: (id) => api.get(`/api/categories/${id}`),
+    create: (data) => api.post('/api/categories', data),
+    update: (id, data) => api.put(`/api/categories/${id}`, data),
+    delete: (id) => api.delete(`/api/categories/${id}`)
   },
 };
 
