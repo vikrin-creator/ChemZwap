@@ -26,6 +26,10 @@ try {
     $pdo->exec($sql);
     $tables_created[] = 'categories';
     
+    // Fix existing image paths - add /api prefix if missing
+    $fixSql = "UPDATE categories SET image = CONCAT('/api', image) WHERE image IS NOT NULL AND image NOT LIKE '/api/%'";
+    $pdo->exec($fixSql);
+    
     echo json_encode([
         'success' => true,
         'message' => 'Migration completed successfully',

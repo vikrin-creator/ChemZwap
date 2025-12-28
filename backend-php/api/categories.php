@@ -77,7 +77,7 @@ if ($method === 'POST' && $parts[0] === 'categories' && !isset($parts[1])) {
                     $uploadPath = $uploadDir . $filename;
                     
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-                        $imagePath = '/uploads/categories/' . $filename;
+                        $imagePath = '/api/uploads/categories/' . $filename;
                     }
                 }
             }
@@ -139,7 +139,7 @@ if ($method === 'PUT' && $parts[0] === 'categories' && isset($parts[1])) {
                 $uploadPath = $uploadDir . $filename;
                 
                 if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-                    $imagePath = '/uploads/categories/' . $filename;
+                    $imagePath = '/api/uploads/categories/' . $filename;
                     $updateImage = true;
                 }
             }
