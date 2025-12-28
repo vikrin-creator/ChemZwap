@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { AnimatedMarqueeHero } from '../components/ui/hero-3';
 import { Recycle, Shield, TrendingDown, Users, ArrowRight, CheckCircle, Beaker, FlaskConical, Droplet, TestTube, Atom, Microscope, Wind, Factory, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Hero images - chemical/sustainability themed
 const HERO_IMAGES = [
@@ -16,7 +18,63 @@ const HERO_IMAGES = [
     "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=600&auto=format&fit=crop&q=80", // Lab Research
 ];
 
+// Default categories (fallback if API fails)
+const DEFAULT_CATEGORIES = [
+    { icon: Beaker, name: 'Lab Equipment', color: 'from-cyan-400 to-cyan-500' },
+    { icon: FlaskConical, name: 'Solvents', color: 'from-blue-400 to-blue-500' },
+    { icon: Droplet, name: 'Reagents', color: 'from-teal-400 to-teal-500' },
+    { icon: TestTube, name: 'Test Tubes', color: 'from-green-400 to-green-500' },
+    { icon: Atom, name: 'Molecular Compounds', color: 'from-emerald-400 to-emerald-500' },
+    { icon: Microscope, name: 'Lab Instruments', color: 'from-sky-400 to-sky-500' },
+    { icon: Wind, name: 'Gases', color: 'from-indigo-400 to-indigo-500' },
+    { icon: Factory, name: 'Industrial Chemicals', color: 'from-violet-400 to-violet-500' },
+    { icon: Shield, name: 'Safety Equipment', color: 'from-purple-400 to-purple-500' },
+    { icon: Recycle, name: 'Recycled Materials', color: 'from-pink-400 to-pink-500' },
+];
+
+// Color palette for dynamic categories
+const CATEGORY_COLORS = [
+    'from-cyan-400 to-cyan-500',
+    'from-blue-400 to-blue-500',
+    'from-teal-400 to-teal-500',
+    'from-green-400 to-green-500',
+    'from-emerald-400 to-emerald-500',
+    'from-sky-400 to-sky-500',
+    'from-indigo-400 to-indigo-500',
+    'from-violet-400 to-violet-500',
+    'from-purple-400 to-purple-500',
+    'from-pink-400 to-pink-500',
+];
+
 const Home = () => {
+    const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+    const [useApiCategories, setUseApiCategories] = useState(false);
+
+    useEffect(() => {
+        // Fetch categories from API
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/categories`);
+                const data = await response.json();
+                if (data.success && data.data && data.data.length > 0) {
+                    // Map API data to category format with colors
+                    const apiCategories = data.data.map((cat, index) => ({
+                        id: cat.id,
+                        name: cat.name,
+                        image: cat.image ? `${API_URL}${cat.image}` : null,
+                        color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+                        icon: DEFAULT_CATEGORIES[index % DEFAULT_CATEGORIES.length]?.icon || Beaker
+                    }));
+                    setCategories(apiCategories);
+                    setUseApiCategories(true);
+                }
+            } catch (error) {
+                console.log('Using default categories (API unavailable)');
+            }
+        };
+        fetchCategories();
+    }, []);
+
     const features = [
         {
             icon: Recycle,
@@ -39,21 +97,6 @@ const Home = () => {
             description: 'Join a growing community of verified suppliers and conscious buyers.',
         },
     ];
-
-    const categories = [
-        { icon: Beaker, name: 'Lab Equipment', color: 'from-cyan-400 to-cyan-500' },
-        { icon: FlaskConical, name: 'Solvents', color: 'from-blue-400 to-blue-500' },
-        { icon: Droplet, name: 'Reagents', color: 'from-teal-400 to-teal-500' },
-        { icon: TestTube, name: 'Test Tubes', color: 'from-green-400 to-green-500' },
-        { icon: Atom, name: 'Molecular Compounds', color: 'from-emerald-400 to-emerald-500' },
-        { icon: Microscope, name: 'Lab Instruments', color: 'from-sky-400 to-sky-500' },
-        { icon: Wind, name: 'Gases', color: 'from-indigo-400 to-indigo-500' },
-        { icon: Factory, name: 'Industrial Chemicals', color: 'from-violet-400 to-violet-500' },
-        { icon: Shield, name: 'Safety Equipment', color: 'from-purple-400 to-purple-500' },
-        { icon: Recycle, name: 'Recycled Materials', color: 'from-pink-400 to-pink-500' },
-    ];
-
-    const [scrollPosition, setScrollPosition] = React.useState(0);
 
     const scrollCategories = (direction) => {
         const container = document.getElementById('categories-scroll');
@@ -116,17 +159,25 @@ const Home = () => {
                         >
                             {categories.map((category, index) => (
                                 <motion.div
-                                    key={category.name}
+                                    key={category.id || category.name}
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.05 }}
                                     className="flex-shrink-0 flex flex-col items-center cursor-pointer group/item"
                                 >
-                                    <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-3 group-hover/item:scale-110 transition-transform shadow-md hover:shadow-xl`}>
-                                        <div className="w-20 h-20 rounded-full bg-primary-100 bg-opacity-70 flex items-center justify-center">
-                                            <category.icon className="h-10 w-10 text-primary-700" strokeWidth={1.5} />
-                                        </div>
+                                    <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-3 group-hover/item:scale-110 transition-transform shadow-md hover:shadow-xl overflow-hidden`}>
+                                        {category.image ? (
+                                            <img
+                                                src={category.image}
+                                                alt={category.name}
+                                                className="w-20 h-20 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-20 h-20 rounded-full bg-primary-100 bg-opacity-70 flex items-center justify-center">
+                                                {category.icon && <category.icon className="h-10 w-10 text-primary-700" strokeWidth={1.5} />}
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-sm font-medium text-gray-900 text-center max-w-[120px] leading-tight">
                                         {category.name}
