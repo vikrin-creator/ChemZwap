@@ -11,9 +11,21 @@ $input = json_decode(file_get_contents('php://input'), true);
 $route = $_GET['route'] ?? '';
 $parts = explode('/', $route);
 
-// Route: POST /api/enquiries (public - no auth)
+// Route: POST /api/enquiries (public - but check for optional auth)
 if ($method === 'POST' && $parts[0] === 'enquiries' && !isset($parts[1])) {
     try {
+        // Try to get user ID if logged in (optional)
+        $userId = null;
+        try {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['HTTP_X_AUTHORIZATION'] ?? '';
+            if (!empty($authHeader)) {
+                $user = Auth::authenticate();
+                $userId = $user['id'];
+            }
+        } catch (Exception $e) {
+            // User not logged in, continue without user_id
+        }
+
         $productId = $input['product_id'] ?? $input['productId'] ?? null;
         $productName = $input['product_name'] ?? $input['productName'] ?? '';
         $customerName = $input['customer_name'] ?? $input['name'] ?? $input['customerName'] ?? '';
@@ -33,8 +45,8 @@ if ($method === 'POST' && $parts[0] === 'enquiries' && !isset($parts[1])) {
         }
 
         $db->query(
-            'INSERT INTO enquiries (product_id, product_name, customer_name, company_name, gstin, email, mobile, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [$productId, $productName, $customerName, $companyName, $gstin, $email, $mobile, $message]
+            'INSERT INTO enquiries (user_id, product_id, product_name, customer_name, company_name, gstin, email, mobile, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [$userId, $productId, $productName, $customerName, $companyName, $gstin, $email, $mobile, $message]
         );
 
         $enquiryId = $db->lastInsertId();
@@ -52,10 +64,36 @@ if ($method === 'POST' && $parts[0] === 'enquiries' && !isset($parts[1])) {
     exit;
 }
 
+// Route: GET /api/enquiries/mine (user - get own enquiries)
+if ($method === 'GET' && $parts[0] === 'enquiries' && isset($parts[1]) && $parts[1] === 'mine') {
+    try {
+        $user = Auth::authenticate();
+
+        $enquiries = $db->fetchAll(
+            'SELECT * FROM enquiries WHERE user_id = ? ORDER BY created_at DESC',
+            [$user['id']]
+        );
+        
+        echo json_encode(['success' => true, 'data' => $enquiries]);
+    } catch (Exception $e) {
+        error_log("Get user enquiries error: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    }
+    exit;
+}
+
 // Route: GET /api/enquiries (admin only)
 if ($method === 'GET' && $parts[0] === 'enquiries') {
     try {
-        Auth::authenticate();
+        $user = Auth::authenticate();
+        
+        // Check if user is admin
+        if ($user['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Admin access required']);
+            exit;
+        }
 
         $enquiries = $db->fetchAll('SELECT * FROM enquiries ORDER BY created_at DESC');
         echo json_encode(['success' => true, 'data' => $enquiries]);
@@ -68,16 +106,22 @@ if ($method === 'GET' && $parts[0] === 'enquiries') {
 }
 
 // Route: PUT /api/enquiries/:id/status (admin only)
-if ($method === 'PUT' && $parts[0] === 'enquiries' && isset($parts[1]) && $parts[2] === 'status') {
+if ($method === 'PUT' && $parts[0] === 'enquiries' && isset($parts[1]) && isset($parts[2]) && $parts[2] === 'status') {
     try {
-        Auth::authenticate();
+        $user = Auth::authenticate();
+        
+        if ($user['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Admin access required']);
+            exit;
+        }
 
         $enquiryId = $parts[1];
         $status = $input['status'] ?? '';
 
         if (!in_array($status, ['new', 'contacted', 'closed'])) {
             http_response_code(400);
-            echo json_encode(['message' => 'Valid status (new, contacted, closed) is required']);
+            echo json_encode(['success' => false, 'message' => 'Valid status (new, contacted, closed) is required']);
             exit;
         }
 
@@ -86,11 +130,11 @@ if ($method === 'PUT' && $parts[0] === 'enquiries' && isset($parts[1]) && $parts
             [$status, $enquiryId]
         );
 
-        echo json_encode(['message' => 'Enquiry status updated successfully']);
+        echo json_encode(['success' => true, 'message' => 'Enquiry status updated successfully']);
     } catch (Exception $e) {
         error_log("Update enquiry error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
@@ -98,21 +142,27 @@ if ($method === 'PUT' && $parts[0] === 'enquiries' && isset($parts[1]) && $parts
 // Route: DELETE /api/enquiries/:id (admin only)
 if ($method === 'DELETE' && $parts[0] === 'enquiries' && isset($parts[1])) {
     try {
-        Auth::authenticate();
+        $user = Auth::authenticate();
+        
+        if ($user['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Admin access required']);
+            exit;
+        }
 
         $enquiryId = $parts[1];
 
         $db->query('DELETE FROM enquiries WHERE id = ?', [$enquiryId]);
 
-        echo json_encode(['message' => 'Enquiry deleted successfully']);
+        echo json_encode(['success' => true, 'message' => 'Enquiry deleted successfully']);
     } catch (Exception $e) {
         error_log("Delete enquiry error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
 
 // 404 - Route not found
 http_response_code(404);
-echo json_encode(['message' => 'Route not found']);
+echo json_encode(['success' => false, 'message' => 'Route not found']);

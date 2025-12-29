@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Beaker } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, User, ChevronDown, LogOut, Package, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     const navLinks = [
         { name: 'Home', path: '/' },
@@ -15,6 +20,13 @@ const Navbar = () => {
     ];
 
     const isActive = (path) => location.pathname === path;
+
+    const handleLogout = () => {
+        logout();
+        setUserMenuOpen(false);
+        toast.success('Logged out successfully');
+        navigate('/');
+    };
 
     return (
         <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
@@ -63,14 +75,78 @@ const Navbar = () => {
                         </Link>
                     </div>
 
-                    {/* CTA Button - Desktop */}
-                    <div className="hidden md:block">
-                        <Link
-                            to="/contact"
-                            className="px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium rounded-full hover:shadow-lg hover:scale-105 transition-all"
-                        >
-                            Get Started
-                        </Link>
+                    {/* CTA / User Menu - Desktop */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        {isAuthenticated ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                    className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                    <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
+                                        <User className="h-4 w-4 text-white" />
+                                    </div>
+                                    <span className="font-medium text-gray-700 max-w-[120px] truncate">
+                                        {user?.full_name || user?.username || 'User'}
+                                    </span>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                <AnimatePresence>
+                                    {userMenuOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                                        >
+                                            <div className="px-4 py-3 border-b border-gray-100">
+                                                <p className="font-medium text-gray-900 truncate">{user?.full_name || user?.username}</p>
+                                                <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                                            </div>
+                                            <Link
+                                                to="/profile"
+                                                onClick={() => setUserMenuOpen(false)}
+                                                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <Settings className="h-4 w-4" />
+                                                <span>My Profile</span>
+                                            </Link>
+                                            <Link
+                                                to="/my-enquiries"
+                                                onClick={() => setUserMenuOpen(false)}
+                                                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <Package className="h-4 w-4" />
+                                                <span>My Enquiries</span>
+                                            </Link>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors w-full"
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                <span>Logout</span>
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/login"
+                                    className="px-5 py-2 text-gray-700 font-medium hover:text-primary-600 transition-colors"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium rounded-full hover:shadow-lg hover:scale-105 transition-all"
+                                >
+                                    Register
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -107,17 +183,72 @@ const Navbar = () => {
                                     {link.name}
                                 </Link>
                             ))}
-                            <Link
-                                to="/contact"
-                                onClick={() => setIsOpen(false)}
-                                className="block w-full px-4 py-3 mt-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium rounded-lg text-center hover:shadow-lg transition-all"
-                            >
-                                Get Started
-                            </Link>
+
+                            <div className="border-t border-gray-200 pt-4 mt-4">
+                                {isAuthenticated ? (
+                                    <>
+                                        <div className="px-4 py-2 mb-2">
+                                            <p className="font-medium text-gray-900">{user?.full_name || user?.username}</p>
+                                            <p className="text-sm text-gray-500">{user?.email}</p>
+                                        </div>
+                                        <Link
+                                            to="/profile"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        >
+                                            <Settings className="h-5 w-5" />
+                                            <span>My Profile</span>
+                                        </Link>
+                                        <Link
+                                            to="/my-enquiries"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
+                                        >
+                                            <Package className="h-5 w-5" />
+                                            <span>My Enquiries</span>
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                handleLogout();
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 w-full"
+                                        >
+                                            <LogOut className="h-5 w-5" />
+                                            <span>Logout</span>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            to="/login"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-gray-50 text-center"
+                                        >
+                                            Login
+                                        </Link>
+                                        <Link
+                                            to="/register"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block w-full px-4 py-3 mt-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium rounded-lg text-center hover:shadow-lg transition-all"
+                                        >
+                                            Register
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Click outside to close user menu */}
+            {userMenuOpen && (
+                <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setUserMenuOpen(false)}
+                />
+            )}
         </nav>
     );
 };

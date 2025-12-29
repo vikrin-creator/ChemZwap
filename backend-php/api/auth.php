@@ -20,7 +20,7 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
 
         if (empty($email) || empty($password)) {
             http_response_code(400);
-            echo json_encode(['message' => 'Email and password are required']);
+            echo json_encode(['success' => false, 'message' => 'Email and password are required']);
             exit;
         }
 
@@ -31,31 +31,36 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
 
         if (!$user) {
             http_response_code(400);
-            echo json_encode(['message' => 'Invalid credentials']);
+            echo json_encode(['success' => false, 'message' => 'Invalid credentials']);
             exit;
         }
 
         if (!password_verify($password, $user['password'])) {
             http_response_code(400);
-            echo json_encode(['message' => 'Invalid credentials']);
+            echo json_encode(['success' => false, 'message' => 'Invalid credentials']);
             exit;
         }
 
         $token = Auth::generateToken($user['id'], $user['email'], $user['role']);
 
         echo json_encode([
+            'success' => true,
             'token' => $token,
             'user' => [
                 'id' => $user['id'],
                 'username' => $user['username'],
                 'email' => $user['email'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'full_name' => $user['full_name'] ?? '',
+                'company_name' => $user['company_name'] ?? '',
+                'gstin' => $user['gstin'] ?? '',
+                'mobile' => $user['mobile'] ?? ''
             ]
         ]);
     } catch (Exception $e) {
         error_log("Login error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
@@ -63,54 +68,80 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
 // Route: POST /api/auth/register
 if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'register') {
     try {
-        $username = $input['username'] ?? '';
+        // Accept both formats
+        $fullName = $input['full_name'] ?? $input['fullName'] ?? $input['name'] ?? '';
         $email = $input['email'] ?? '';
         $password = $input['password'] ?? '';
-        $role = $input['role'] ?? 'user';
+        $companyName = $input['company_name'] ?? $input['companyName'] ?? '';
+        $gstin = $input['gstin'] ?? '';
+        $mobile = $input['mobile'] ?? '';
+        $role = 'user'; // Always register as user
 
-        if (empty($username) || empty($email) || empty($password)) {
+        // Use full_name as username if no username provided
+        $username = $input['username'] ?? $fullName;
+
+        if (empty($fullName) || empty($email) || empty($password)) {
             http_response_code(400);
-            echo json_encode(['message' => 'All fields are required']);
+            echo json_encode(['success' => false, 'message' => 'Name, email, and password are required']);
+            exit;
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+            exit;
+        }
+
+        // Validate password length
+        if (strlen($password) < 6) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters']);
             exit;
         }
 
         // Check if user exists
         $existing = $db->fetchOne(
-            'SELECT id FROM users WHERE email = ? OR username = ?',
-            [$email, $username]
+            'SELECT id FROM users WHERE email = ?',
+            [$email]
         );
 
         if ($existing) {
             http_response_code(400);
-            echo json_encode(['message' => 'User already exists']);
+            echo json_encode(['success' => false, 'message' => 'Email already registered']);
             exit;
         }
 
         // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        // Create user
+        // Create user with profile fields
         $db->query(
-            'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
-            [$username, $email, $hashedPassword, $role]
+            'INSERT INTO users (username, email, password, role, full_name, company_name, gstin, mobile) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [$username, $email, $hashedPassword, $role, $fullName, $companyName, $gstin, $mobile]
         );
 
         $userId = $db->lastInsertId();
         $token = Auth::generateToken($userId, $email, $role);
 
         echo json_encode([
+            'success' => true,
             'token' => $token,
             'user' => [
                 'id' => $userId,
                 'username' => $username,
                 'email' => $email,
-                'role' => $role
+                'role' => $role,
+                'full_name' => $fullName,
+                'company_name' => $companyName,
+                'gstin' => $gstin,
+                'mobile' => $mobile
             ]
         ]);
     } catch (Exception $e) {
         error_log("Register error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -121,21 +152,109 @@ if ($method === 'GET' && $parts[0] === 'auth' && $parts[1] === 'me') {
         $user = Auth::authenticate();
         
         $userData = $db->fetchOne(
-            'SELECT id, username, email, role, created_at FROM users WHERE id = ?',
+            'SELECT id, username, email, role, full_name, company_name, gstin, mobile, created_at FROM users WHERE id = ?',
             [$user['id']]
         );
 
         if (!$userData) {
             http_response_code(404);
-            echo json_encode(['message' => 'User not found']);
+            echo json_encode(['success' => false, 'message' => 'User not found']);
             exit;
         }
 
-        echo json_encode($userData);
+        echo json_encode([
+            'success' => true,
+            'user' => $userData
+        ]);
     } catch (Exception $e) {
         error_log("Get user error: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    }
+    exit;
+}
+
+// Route: PUT /api/auth/profile
+if ($method === 'PUT' && $parts[0] === 'auth' && $parts[1] === 'profile') {
+    try {
+        $user = Auth::authenticate();
+        
+        $fullName = $input['full_name'] ?? $input['fullName'] ?? '';
+        $companyName = $input['company_name'] ?? $input['companyName'] ?? '';
+        $gstin = $input['gstin'] ?? '';
+        $mobile = $input['mobile'] ?? '';
+
+        if (empty($fullName)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Name is required']);
+            exit;
+        }
+
+        $db->query(
+            'UPDATE users SET full_name = ?, company_name = ?, gstin = ?, mobile = ?, username = ? WHERE id = ?',
+            [$fullName, $companyName, $gstin, $mobile, $fullName, $user['id']]
+        );
+
+        // Fetch updated user data
+        $userData = $db->fetchOne(
+            'SELECT id, username, email, role, full_name, company_name, gstin, mobile FROM users WHERE id = ?',
+            [$user['id']]
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $userData
+        ]);
+    } catch (Exception $e) {
+        error_log("Update profile error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
+    }
+    exit;
+}
+
+// Route: PUT /api/auth/change-password
+if ($method === 'PUT' && $parts[0] === 'auth' && $parts[1] === 'change-password') {
+    try {
+        $user = Auth::authenticate();
+        
+        $currentPassword = $input['currentPassword'] ?? $input['current_password'] ?? '';
+        $newPassword = $input['newPassword'] ?? $input['new_password'] ?? '';
+
+        if (empty($currentPassword) || empty($newPassword)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Current and new passwords are required']);
+            exit;
+        }
+
+        if (strlen($newPassword) < 6) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'New password must be at least 6 characters']);
+            exit;
+        }
+
+        // Get current user
+        $userData = $db->fetchOne('SELECT password FROM users WHERE id = ?', [$user['id']]);
+
+        if (!password_verify($currentPassword, $userData['password'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Current password is incorrect']);
+            exit;
+        }
+
+        // Update password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $db->query('UPDATE users SET password = ? WHERE id = ?', [$hashedPassword, $user['id']]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Password changed successfully'
+        ]);
+    } catch (Exception $e) {
+        error_log("Change password error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
@@ -147,18 +266,18 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
 
         if (empty($email)) {
             http_response_code(400);
-            echo json_encode(['message' => 'Email is required']);
+            echo json_encode(['success' => false, 'message' => 'Email is required']);
             exit;
         }
 
         $user = $db->fetchOne(
-            'SELECT id, username FROM users WHERE email = ?',
+            'SELECT id, username, full_name FROM users WHERE email = ?',
             [$email]
         );
 
         if (!$user) {
             http_response_code(404);
-            echo json_encode(['message' => 'No account found with this email']);
+            echo json_encode(['success' => false, 'message' => 'No account found with this email']);
             exit;
         }
 
@@ -171,12 +290,14 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
             [$resetCode, $expiry, $user['id']]
         );
 
+        $displayName = $user['full_name'] ?: $user['username'];
+
         // Send Email
         $html = "
             <div style=\"font-family: Arial, sans-serif; padding: 20px; color: #333;\">
                 <h2>Password Reset Request</h2>
-                <p>Hello {$user['username']},</p>
-                <p>You requested a password reset for your ChemZwap Admin account.</p>
+                <p>Hello {$displayName},</p>
+                <p>You requested a password reset for your ChemZwap account.</p>
                 <p>Your verification code is:</p>
                 <div style=\"background: #f4f4f4; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; letter-spacing: 5px; border-radius: 8px;\">
                     {$resetCode}
@@ -184,7 +305,7 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
                 <p>This code will expire in 15 minutes.</p>
                 <p>If you didn't request this, please ignore this email.</p>
                 <hr />
-                <p style=\"font-size: 12px; color: #777;\">ChemZwap Admin Panel</p>
+                <p style=\"font-size: 12px; color: #777;\">ChemZwap - Sustainable Chemical Marketplace</p>
             </div>
         ";
 
@@ -194,12 +315,12 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
             echo json_encode(['success' => true, 'message' => 'Reset code sent to your email']);
         } else {
             http_response_code(500);
-            echo json_encode(['message' => 'Failed to send reset email']);
+            echo json_encode(['success' => false, 'message' => 'Failed to send reset email']);
         }
     } catch (Exception $e) {
         error_log("Forgot password error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
@@ -209,11 +330,17 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'reset-password'
     try {
         $email = $input['email'] ?? '';
         $code = $input['code'] ?? '';
-        $newPassword = $input['newPassword'] ?? '';
+        $newPassword = $input['newPassword'] ?? $input['new_password'] ?? '';
 
         if (empty($email) || empty($code) || empty($newPassword)) {
             http_response_code(400);
-            echo json_encode(['message' => 'All fields are required']);
+            echo json_encode(['success' => false, 'message' => 'All fields are required']);
+            exit;
+        }
+
+        if (strlen($newPassword) < 6) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters']);
             exit;
         }
 
@@ -224,7 +351,7 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'reset-password'
 
         if (!$user) {
             http_response_code(400);
-            echo json_encode(['message' => 'Invalid or expired reset code']);
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired reset code']);
             exit;
         }
 
@@ -241,11 +368,11 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'reset-password'
     } catch (Exception $e) {
         error_log("Reset password error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error']);
     }
     exit;
 }
 
 // 404 - Route not found
 http_response_code(404);
-echo json_encode(['message' => 'Route not found']);
+echo json_encode(['success' => false, 'message' => 'Route not found']);
