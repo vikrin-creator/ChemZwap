@@ -1,15 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Beaker } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Beaker, X, Filter } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 
 const Products = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState('');
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
     const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch categories from API
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/categories`);
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setCategories(data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    // Update selectedCategory when URL changes
+    useEffect(() => {
+        const categoryFromUrl = searchParams.get('category') || '';
+        setSelectedCategory(categoryFromUrl);
+    }, [searchParams]);
 
     // Fetch products from API
     useEffect(() => {
@@ -28,9 +53,13 @@ const Products = () => {
                         if (!imageUrl || imageUrl.trim() === '') {
                             imageUrl = 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=800&h=600&fit=crop';
                         }
-                        // If it's a local path, prepend API_URL
-                        else if (imageUrl.startsWith('/uploads')) {
+                        // If it's an API path (with /api prefix), prepend base URL
+                        else if (imageUrl.startsWith('/api/uploads')) {
                             imageUrl = `${API_URL}${imageUrl}`;
+                        }
+                        // If it's an old-style path (without /api prefix), add /api and prepend base URL
+                        else if (imageUrl.startsWith('/uploads')) {
+                            imageUrl = `${API_URL}/api${imageUrl}`;
                         }
 
                         return {
@@ -40,7 +69,8 @@ const Products = () => {
                             casNumber: p.cas_number || '',
                             einecs: p.einecs || '',
                             image: imageUrl,
-                            category: p.category || ''
+                            category: p.category || '',
+                            category_id: p.category_id ? p.category_id.toString() : ''
                         };
                     });
                     setProducts(mappedProducts);
@@ -54,13 +84,40 @@ const Products = () => {
         fetchProducts();
     }, []);
 
-    // Filter products based on search query
-    const filteredProducts = products.filter(product =>
-        product.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.synonyms?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.casNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.einecs?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Handle category selection
+    const handleCategoryChange = (categoryId) => {
+        setSelectedCategory(categoryId);
+        if (categoryId) {
+            setSearchParams({ category: categoryId });
+        } else {
+            setSearchParams({});
+        }
+    };
+
+    // Get selected category name
+    const getSelectedCategoryName = () => {
+        if (!selectedCategory) return null;
+        const cat = categories.find(c => c.id.toString() === selectedCategory.toString());
+        return cat ? cat.name : null;
+    };
+
+    // Filter products based on search query AND category
+    const filteredProducts = products.filter(product => {
+        // Search filter
+        const matchesSearch =
+            product.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.synonyms?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.casNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.einecs?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // Category filter - match by ID or name
+        const matchesCategory = !selectedCategory ||
+            product.category_id === selectedCategory.toString() ||
+            product.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+            product.category?.toLowerCase() === getSelectedCategoryName()?.toLowerCase();
+
+        return matchesSearch && matchesCategory;
+    });
 
     return (
         <div className="bg-white min-h-screen">
@@ -85,6 +142,44 @@ const Products = () => {
                             <Search className="h-5 w-5" />
                             <span>Search</span>
                         </button>
+                    </div>
+
+                    {/* Category Filter Tabs */}
+                    <div className="mt-6">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2 text-gray-600 mr-2">
+                                <Filter className="h-4 w-4" />
+                                <span className="text-sm font-medium">Filter:</span>
+                            </div>
+
+                            {/* All Products Tab */}
+                            <button
+                                onClick={() => handleCategoryChange('')}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${!selectedCategory
+                                    ? 'bg-primary-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                All Products
+                            </button>
+
+                            {/* Category Tabs */}
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleCategoryChange(cat.id.toString())}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${selectedCategory === cat.id.toString()
+                                        ? 'bg-primary-500 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                >
+                                    {cat.name}
+                                    {selectedCategory === cat.id.toString() && (
+                                        <X className="h-3 w-3" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

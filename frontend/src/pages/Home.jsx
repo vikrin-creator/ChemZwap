@@ -158,31 +158,35 @@ const Home = () => {
                             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                         >
                             {categories.map((category, index) => (
-                                <motion.div
+                                <Link
                                     key={category.id || category.name}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="flex-shrink-0 flex flex-col items-center cursor-pointer group/item"
+                                    to={`/products?category=${category.id || encodeURIComponent(category.name)}`}
                                 >
-                                    <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-3 group-hover/item:scale-110 transition-transform shadow-md hover:shadow-xl overflow-hidden`}>
-                                        {category.image ? (
-                                            <img
-                                                src={category.image}
-                                                alt={category.name}
-                                                className="w-20 h-20 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-20 h-20 rounded-full bg-primary-100 bg-opacity-70 flex items-center justify-center">
-                                                {category.icon && <category.icon className="h-10 w-10 text-primary-700" strokeWidth={1.5} />}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-900 text-center max-w-[120px] leading-tight">
-                                        {category.name}
-                                    </p>
-                                </motion.div>
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className="flex-shrink-0 flex flex-col items-center cursor-pointer group/item"
+                                    >
+                                        <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${category.color} bg-opacity-10 flex items-center justify-center mb-3 group-hover/item:scale-110 transition-transform shadow-md hover:shadow-xl overflow-hidden`}>
+                                            {category.image ? (
+                                                <img
+                                                    src={category.image}
+                                                    alt={category.name}
+                                                    className="w-20 h-20 rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-20 h-20 rounded-full bg-primary-100 bg-opacity-70 flex items-center justify-center">
+                                                    {category.icon && <category.icon className="h-10 w-10 text-primary-700" strokeWidth={1.5} />}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-900 text-center max-w-[120px] leading-tight">
+                                            {category.name}
+                                        </p>
+                                    </motion.div>
+                                </Link>
                             ))}
                         </div>
 

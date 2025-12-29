@@ -26,9 +26,13 @@ try {
     $pdo->exec($sql);
     $tables_created[] = 'categories';
     
-    // Fix existing image paths - add /api prefix if missing
+    // Fix existing image paths for categories - add /api prefix if missing
     $fixSql = "UPDATE categories SET image = CONCAT('/api', image) WHERE image IS NOT NULL AND image NOT LIKE '/api/%'";
     $pdo->exec($fixSql);
+    
+    // Fix existing image paths for products - add /api prefix if missing
+    $fixProductsSql = "UPDATE products SET image = CONCAT('/api', image) WHERE image IS NOT NULL AND image NOT LIKE '/api/%' AND image LIKE '/uploads/%'";
+    $pdo->exec($fixProductsSql);
     
     echo json_encode([
         'success' => true,

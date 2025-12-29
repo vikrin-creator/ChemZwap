@@ -92,7 +92,7 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
                     
                     // Move uploaded file
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-                        $imagePath = '/uploads/' . $filename;
+                        $imagePath = '/api/uploads/' . $filename;
                     }
                 }
             }
