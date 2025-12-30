@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import adminApi from '../services/api';
 import BottomNav from '../components/BottomNav';
-
+import { Package, Plus, Pencil, Trash2 } from 'lucide-react';
 import ConfirmationModal from '../components/ConfirmationModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -185,9 +185,7 @@ const Products = () => {
                     onClick={openAddModal}
                     className="flex items-center gap-2 bg-green-600 text-white px-6 py-2.5 rounded-lg transition-all hover:bg-green-500"
                 >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                    </svg>
+                    <Plus className="w-5 h-5" />
                     Add Product
                 </button>
             </div>
@@ -195,7 +193,7 @@ const Products = () => {
             {/* Products Table */}
             {products.length === 0 ? (
                 <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-                    <div className="text-6xl mb-4">📦</div>
+                    <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                     <h2 className="text-xl font-semibold text-gray-300 mb-2">No Products</h2>
                     <p className="text-gray-500 mb-4">Get started by adding your first product</p>
                     <button onClick={openAddModal} className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg">

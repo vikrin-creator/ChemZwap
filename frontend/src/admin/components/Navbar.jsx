@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import adminApi from "../services/api";
+import { LayoutDashboard, Mail, Package, Tag, LogOut } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
@@ -30,10 +31,10 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: "📊" },
-    { path: "/admin/enquiries", label: "Enquiries", icon: "📩" },
-    { path: "/admin/products", label: "Products", icon: "📦" },
-    { path: "/admin/categories", label: "Category", icon: "🏷️" },
+    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin/enquiries", label: "Enquiries", icon: Mail },
+    { path: "/admin/products", label: "Products", icon: Package },
+    { path: "/admin/categories", label: "Category", icon: Tag },
   ];
 
   return (
@@ -48,6 +49,7 @@ const Navbar = () => {
         <div className="space-y-2 flex-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const IconComponent = item.icon;
             return (
               <Link
                 key={item.path}
@@ -57,7 +59,7 @@ const Navbar = () => {
                   : "text-gray-400 hover:bg-gray-800 hover:text-white"
                   }`}
               >
-                <span className="text-xl">{item.icon}</span>
+                <IconComponent className="w-5 h-5" />
                 <span className="font-semibold">{item.label}</span>
                 {isActive && (
                   <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>

@@ -132,15 +132,17 @@ export const AnimatedMarqueeHero = ({
                 </motion.h1>
 
                 {/* Description */}
-                <motion.p
-                    initial="hidden"
-                    animate="show"
-                    variants={FADE_IN_ANIMATION_VARIANTS}
-                    transition={{ delay: 0.5 }}
-                    className="mt-6 max-w-2xl text-lg md:text-xl text-gray-600 leading-relaxed"
-                >
-                    {description}
-                </motion.p>
+                {description && (
+                    <motion.p
+                        initial="hidden"
+                        animate="show"
+                        variants={FADE_IN_ANIMATION_VARIANTS}
+                        transition={{ delay: 0.5 }}
+                        className="mt-6 max-w-2xl text-lg md:text-xl text-gray-600 leading-relaxed"
+                    >
+                        {description}
+                    </motion.p>
+                )}
 
                 {/* Call to Action Button */}
                 <motion.div

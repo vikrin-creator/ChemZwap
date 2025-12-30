@@ -120,7 +120,6 @@ const Home = () => {
                         </span>
                     </>
                 }
-                description="Connect suppliers with excess chemicals to buyers seeking top-quality materials. Building a sustainable future, one exchange at a time."
                 ctaText="Explore Products"
                 ctaLink="/products"
                 images={HERO_IMAGES}

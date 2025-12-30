@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import adminApi from '../services/api';
 import BottomNav from '../components/BottomNav';
 import { Link } from 'react-router-dom';
+import { Package, ClipboardList, Sparkles, Phone, Inbox, RefreshCw, CheckCircle } from 'lucide-react';
 
 const Dashboard = () => {
   const toastShownRef = useRef(false);
@@ -108,10 +109,7 @@ const Dashboard = () => {
           className={`flex items-center gap-2 bg-cyan-600 text-white px-6 py-2.5 rounded-lg transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-cyan-500'
             }`}
         >
-          <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </div>
@@ -121,7 +119,7 @@ const Dashboard = () => {
         {/* Total Products */}
         <Link to="/admin/products" className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 p-4 md:p-6 rounded-xl border border-blue-500/30 hover:border-blue-400 transition-all group">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-blue-400 text-2xl">📦</span>
+            <Package className="w-7 h-7 text-blue-400" />
             <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-1 rounded-full">View All →</span>
           </div>
           <p className="text-3xl md:text-4xl font-bold text-white">{stats.totalProducts}</p>
@@ -131,7 +129,7 @@ const Dashboard = () => {
         {/* Total Enquiries */}
         <Link to="/admin/enquiries" className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 p-4 md:p-6 rounded-xl border border-purple-500/30 hover:border-purple-400 transition-all group">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-purple-400 text-2xl">📋</span>
+            <ClipboardList className="w-7 h-7 text-purple-400" />
             <span className="text-xs text-purple-300 bg-purple-500/20 px-2 py-1 rounded-full">View All →</span>
           </div>
           <p className="text-3xl md:text-4xl font-bold text-white">{stats.totalEnquiries}</p>
@@ -141,7 +139,7 @@ const Dashboard = () => {
         {/* New Enquiries */}
         <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 p-4 md:p-6 rounded-xl border border-green-500/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-green-400 text-2xl">🆕</span>
+            <Sparkles className="w-7 h-7 text-green-400" />
             <span className="text-xs text-green-300 bg-green-500/20 px-2 py-1 rounded-full">New</span>
           </div>
           <p className="text-3xl md:text-4xl font-bold text-white">{stats.newEnquiries}</p>
@@ -151,7 +149,7 @@ const Dashboard = () => {
         {/* Contacted Enquiries */}
         <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 p-4 md:p-6 rounded-xl border border-yellow-500/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-yellow-400 text-2xl">📞</span>
+            <Phone className="w-7 h-7 text-yellow-400" />
             <span className="text-xs text-yellow-300 bg-yellow-500/20 px-2 py-1 rounded-full">In Progress</span>
           </div>
           <p className="text-3xl md:text-4xl font-bold text-white">{stats.contactedEnquiries}</p>
@@ -211,7 +209,7 @@ const Dashboard = () => {
 
         {recentEnquiries.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-4xl mb-2">📭</div>
+            <Inbox className="w-12 h-12 text-gray-500 mx-auto mb-2" />
             <p className="text-gray-400">No enquiries yet</p>
             <p className="text-sm text-gray-500">Enquiries from customers will appear here</p>
           </div>
@@ -255,14 +253,14 @@ const Dashboard = () => {
           to="/admin/products"
           className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-xl transition-all"
         >
-          <span className="text-xl">📦</span>
+          <Package className="w-5 h-5" />
           <span>Manage Products</span>
         </Link>
         <Link
           to="/admin/enquiries"
           className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 text-white p-4 rounded-xl transition-all"
         >
-          <span className="text-xl">📋</span>
+          <ClipboardList className="w-5 h-5" />
           <span>View Enquiries</span>
         </Link>
       </div>
