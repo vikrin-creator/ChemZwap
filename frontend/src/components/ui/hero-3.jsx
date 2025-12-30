@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Props interface for the component
 // interface AnimatedMarqueeHeroProps {
@@ -45,6 +47,16 @@ export const AnimatedMarqueeHero = ({
     images,
     className,
 }) => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const navigate = useNavigate();
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
     // Animation variants for the text content
     const FADE_IN_ANIMATION_VARIANTS = {
         hidden: { opacity: 0, y: 10 },
@@ -62,15 +74,33 @@ export const AnimatedMarqueeHero = ({
             )}
         >
             <div className="z-10 flex flex-col items-center max-w-5xl mx-auto">
-                {/* Tagline */}
-                <motion.div
+                {/* Search Bar */}
+                <motion.form
+                    onSubmit={handleSearch}
                     initial="hidden"
                     animate="show"
                     variants={FADE_IN_ANIMATION_VARIANTS}
-                    className="mb-6 inline-block rounded-full border-2 border-primary-300 bg-white/80 px-6 py-2 text-sm font-medium text-primary-700 backdrop-blur-sm shadow-sm"
+                    className="mb-6 w-full max-w-xl"
                 >
-                    {tagline}
-                </motion.div>
+                    <div className="relative flex items-center">
+                        <div className="absolute left-4 text-gray-400">
+                            <Search className="h-5 w-5" />
+                        </div>
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search chemicals, CAS numbers, products..."
+                            className="w-full pl-12 pr-28 py-4 rounded-full border-2 border-primary-200 bg-white/90 backdrop-blur-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 shadow-lg transition-all text-base"
+                        />
+                        <button
+                            type="submit"
+                            className="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-full hover:from-primary-600 hover:to-primary-700 transition-all shadow-md text-sm"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </motion.form>
 
                 {/* Main Title */}
                 <motion.h1

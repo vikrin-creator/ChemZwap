@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
@@ -30,10 +30,12 @@ const Products = () => {
         fetchCategories();
     }, []);
 
-    // Update selectedCategory when URL changes
+    // Update selectedCategory and searchQuery when URL changes
     useEffect(() => {
         const categoryFromUrl = searchParams.get('category') || '';
+        const searchFromUrl = searchParams.get('search') || '';
         setSelectedCategory(categoryFromUrl);
+        setSearchQuery(searchFromUrl);
     }, [searchParams]);
 
     // Fetch products from API
