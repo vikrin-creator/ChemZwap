@@ -76,7 +76,7 @@ const Footer = () => {
                 <div className="mt-12 pt-8 border-t border-gray-700">
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                         <p className="text-sm text-gray-400">
-                            © {currentYear} ChemZwap. All rights reserved.
+                            © {currentYear} <Link to="/" className="text-green-500 hover:text-green-400 transition-colors bg-transparent" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>ChemZwap</Link>. All rights reserved.
                         </p>
                         <p className="text-sm text-gray-400">
                             Designed and Developed by{' '}
