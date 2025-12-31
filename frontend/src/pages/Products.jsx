@@ -146,41 +146,46 @@ const Products = () => {
                         </button>
                     </div>
 
-                    {/* Category Filter Tabs */}
+                    {/* Category Filter Dropdown */}
                     <div className="mt-6">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-2 text-gray-600 mr-2">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 text-gray-600">
                                 <Filter className="h-4 w-4" />
                                 <span className="text-sm font-medium">Filter:</span>
                             </div>
 
-                            {/* All Products Tab */}
-                            <button
-                                onClick={() => handleCategoryChange('')}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${!selectedCategory
-                                    ? 'bg-primary-500 text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                All Products
-                            </button>
-
-                            {/* Category Tabs */}
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => handleCategoryChange(cat.id.toString())}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${selectedCategory === cat.id.toString()
-                                        ? 'bg-primary-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
+                            {/* Category Dropdown */}
+                            <div className="relative">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => handleCategoryChange(e.target.value)}
+                                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer min-w-[200px]"
                                 >
-                                    {cat.name}
-                                    {selectedCategory === cat.id.toString() && (
-                                        <X className="h-3 w-3" />
-                                    )}
+                                    <option value="">All Products</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id.toString()}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {/* Dropdown Arrow */}
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Clear Filter Button - Only shown when a category is selected */}
+                            {selectedCategory && (
+                                <button
+                                    onClick={() => handleCategoryChange('')}
+                                    className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                    <span>Clear</span>
                                 </button>
-                            ))}
+                            )}
                         </div>
                     </div>
                 </div>
