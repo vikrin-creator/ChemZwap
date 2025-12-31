@@ -69,11 +69,11 @@ export const AnimatedMarqueeHero = ({
     return (
         <section
             className={cn(
-                "relative w-full min-h-[100svh] overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-start text-center px-4 pt-8 md:pt-12",
+                "relative w-full overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-start text-center px-4 pt-8 md:pt-12",
                 className
             )}
         >
-            <div className="z-10 flex flex-col items-center max-w-5xl mx-auto mb-16 md:mb-40">
+            <div className="z-10 flex flex-col items-center max-w-5xl mx-auto mb-4 md:mb-8">
                 {/* Search Bar */}
                 <motion.form
                     onSubmit={handleSearch}
@@ -156,7 +156,7 @@ export const AnimatedMarqueeHero = ({
             </div>
 
             {/* Animated Image Marquee */}
-            <div className="absolute bottom-0 left-0 right-0 w-full h-[50%] md:h-2/5 overflow-hidden">
+            <div className="w-full mt-auto overflow-hidden">
                 <motion.div
                     className="flex gap-2 md:gap-4"
                     animate={{
