@@ -12,8 +12,8 @@ const AdminLayout = () => {
             {/* Left Sidebar Navbar */}
             <Navbar />
 
-            {/* Main Content Area */}
-            <main className="flex-1 h-screen overflow-y-auto relative">
+            {/* Main Content Area - pl-16 for hamburger menu button space */}
+            <main className="flex-1 h-screen overflow-y-auto relative pl-16">
                 <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<Products />} />
