@@ -107,7 +107,7 @@ const Home = () => {
     };
 
     return (
-        <div className="bg-white">
+        <div className="bg-white overflow-x-hidden">
             {/* Hero Section */}
             <AnimatedMarqueeHero
                 tagline="Pioneering Chemical Marketplace"
