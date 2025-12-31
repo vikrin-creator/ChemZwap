@@ -126,7 +126,7 @@ const Home = () => {
             />
 
             {/* Shop Top Categories Section */}
-            <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white border-b border-gray-200">
+            <section className="py-8 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white border-b border-gray-200 -mt-1">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

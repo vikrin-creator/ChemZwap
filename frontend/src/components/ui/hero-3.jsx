@@ -69,11 +69,11 @@ export const AnimatedMarqueeHero = ({
     return (
         <section
             className={cn(
-                "relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-center text-center px-4 pt-20 pb-20 -mt-20",
+                "relative w-full min-h-[100svh] overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100 flex flex-col items-center justify-start text-center px-4 pt-8 md:pt-12",
                 className
             )}
         >
-            <div className="z-10 flex flex-col items-center max-w-5xl mx-auto">
+            <div className="z-10 flex flex-col items-center max-w-5xl mx-auto mb-16 md:mb-40">
                 {/* Search Bar */}
                 <motion.form
                     onSubmit={handleSearch}
@@ -156,9 +156,9 @@ export const AnimatedMarqueeHero = ({
             </div>
 
             {/* Animated Image Marquee */}
-            <div className="absolute bottom-0 left-0 w-full h-1/3 md:h-2/5 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_80%,transparent)]">
+            <div className="absolute bottom-0 left-0 right-0 w-full h-[50%] md:h-2/5 overflow-hidden">
                 <motion.div
-                    className="flex gap-4"
+                    className="flex gap-2 md:gap-4"
                     animate={{
                         x: ["-50%", "0%"],
                         transition: {
@@ -171,7 +171,7 @@ export const AnimatedMarqueeHero = ({
                     {duplicatedImages.map((src, index) => (
                         <div
                             key={index}
-                            className="relative aspect-[3/4] h-48 md:h-64 flex-shrink-0"
+                            className="relative aspect-[3/4] h-40 md:h-64 flex-shrink-0"
                             style={{
                                 rotate: `${(index % 2 === 0 ? -2 : 2)}deg`,
                             }}
