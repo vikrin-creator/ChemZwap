@@ -51,6 +51,39 @@ if ($method === 'POST' && $parts[0] === 'enquiries' && !isset($parts[1])) {
 
         $enquiryId = $db->lastInsertId();
 
+        // Send email notification
+        try {
+            require_once __DIR__ . '/../EmailService.php';
+            $emailService = new EmailService();
+            
+            // Determine if this is a contact form or product enquiry
+            $isContactForm = strpos($productName, 'Contact Form') !== false;
+            
+            $emailData = [
+                'customer_name' => $customerName,
+                'email' => $email,
+                'mobile' => $mobile,
+                'product_name' => $productName,
+                'company_name' => $companyName,
+                'gstin' => $gstin,
+                'message' => $message,
+                'enquiry_type' => $input['enquiry_type'] ?? 'General',
+            ];
+            
+            if ($isContactForm) {
+                $emailResult = $emailService->sendContactFormEmail($emailData);
+            } else {
+                $emailResult = $emailService->sendEnquiryEmail($emailData);
+            }
+            
+            if (!$emailResult['success']) {
+                error_log("Email notification failed: " . $emailResult['message']);
+            }
+        } catch (Exception $emailError) {
+            // Log error but don't fail the enquiry submission
+            error_log("Email service error: " . $emailError->getMessage());
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'Enquiry submitted successfully',

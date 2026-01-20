@@ -5,6 +5,7 @@ import Dashboard from '../pages/Dashboard';
 import Products from '../pages/Products';
 import Enquiries from '../pages/Enquiries';
 import Categories from '../pages/Categories';
+import ContactUs from '../pages/ContactUs';
 
 const AdminLayout = () => {
     return (
@@ -18,6 +19,7 @@ const AdminLayout = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<Products />} />
                     <Route path="enquiries" element={<Enquiries />} />
+                    <Route path="contact-us" element={<ContactUs />} />
                     <Route path="categories" element={<Categories />} />
                 </Routes>
             </main>
@@ -29,3 +31,4 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
+

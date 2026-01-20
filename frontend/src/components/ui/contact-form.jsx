@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, User, Mail, Phone, MessageSquare, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const ContactForm = () => {
     const [formData, setFormData] = useState({
@@ -19,25 +22,55 @@ const ContactForm = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitStatus(null);
 
-        // Simulate form submission
-        setTimeout(() => {
-            console.log('Form submitted:', formData);
-            setSubmitStatus('success');
-            setIsSubmitting(false);
-            // Reset form
-            setFormData({
-                name: '',
-                email: '',
-                phone: '',
-                enquiry: '',
-                message: '',
+        try {
+            // Save to database (Admin Panel) - Backend will also send email
+            const response = await fetch(`${API_URL}/api/enquiries`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customer_name: formData.name,
+                    email: formData.email,
+                    mobile: formData.phone,
+                    product_name: formData.enquiry ? `Contact Form - ${formData.enquiry}` : 'Contact Form Enquiry',
+                    message: formData.message,
+                    enquiry_type: formData.enquiry,
+                }),
             });
-        }, 1500);
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Backend handles email sending automatically via PHPMailer
+                setSubmitStatus('success');
+                toast.success('Message sent successfully!');
+                // Reset form
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    enquiry: '',
+                    message: '',
+                });
+            } else {
+                setSubmitStatus('error');
+                toast.error(data.message || 'Failed to send message');
+            }
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            setSubmitStatus('error');
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -201,6 +234,17 @@ const ContactForm = () => {
                         className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm"
                     >
                         ✓ Thank you! Your message has been sent successfully. We'll get back to you soon.
+                    </motion.div>
+                )}
+
+                {/* Error Message */}
+                {submitStatus === 'error' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                    >
+                        ✕ Something went wrong. Please try again or contact us directly.
                     </motion.div>
                 )}
             </form>

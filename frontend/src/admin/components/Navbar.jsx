@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import adminApi from "../services/api";
-import { LayoutDashboard, Mail, Package, Tag, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Mail, Package, Tag, LogOut, Menu, X, MessageSquare } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
@@ -39,6 +39,7 @@ const Navbar = () => {
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/enquiries", label: "Enquiries", icon: Mail },
+    { path: "/admin/contact-us", label: "Contact Us", icon: MessageSquare },
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/categories", label: "Category", icon: Tag },
   ];
