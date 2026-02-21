@@ -29,7 +29,7 @@ jobs:
       env:
         CI: false
         GENERATE_SOURCEMAP: false
-        VITE_API_URL: https://www.chemzwap.com/api
+        VITE_API_URL: https://www.chemzwap.com
         
     # Deploy Frontend to public_html
     - name: Deploy Frontend to Hostinger
