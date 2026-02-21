@@ -68,7 +68,7 @@ jobs:
         DB_USER=u177524058_Chemzwap
         DB_PASSWORD=Chemzwap@123
         DB_NAME=u177524058_Chemzwap
-        JWT_SECRET=chemzwap_secret_key_2024
+        JWT_SECRET=chemzwap_super_secret_jwt_key_2024_hostinger_prod
         EMAIL_USER=swapchemicals@gmail.com
         EMAIL_PASS=rvsq zyhf qmtj apqb
         ADMIN_EMAIL=swapchemicals@gmail.com

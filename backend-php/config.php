@@ -36,7 +36,7 @@ if (!defined('DB_PASSWORD')) define('DB_PASSWORD', 'Chemzwap@123');
 if (!defined('DB_NAME')) define('DB_NAME', 'u177524058_Chemzwap');
 
 // JWT Secret
-if (!defined('JWT_SECRET')) define('JWT_SECRET', 'chemzwap_secret_key_2024');
+if (!defined('JWT_SECRET')) define('JWT_SECRET', 'chemzwap_super_secret_jwt_key_2024_hostinger_prod');
 
 // Email Configuration
 if (!defined('EMAIL_USER')) define('EMAIL_USER', 'swapchemicals@gmail.com');
