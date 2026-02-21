@@ -31,6 +31,7 @@ jobs:
       env:
         CI: false
         GENERATE_SOURCEMAP: false
+        VITE_API_URL: https://www.chemzwap.com/api
         
     # Deploy Frontend to public_html
     - name: Deploy Frontend to Hostinger
@@ -55,23 +56,23 @@ jobs:
       run: |
         composer install --no-dev --optimize-autoloader --no-interaction
 
-    # Create .env file from GitHub Secrets (never commit .env to repo)
+    # Create .env file with hardcoded production values
     - name: Create backend .env file
       run: |
-        cat > ./backend-php/.env << 'EOF'
-        DB_HOST=${{ secrets.DB_HOST }}
-        DB_USER=${{ secrets.DB_USER }}
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        DB_NAME=${{ secrets.DB_NAME }}
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        EMAIL_USER=${{ secrets.EMAIL_USER }}
-        EMAIL_PASS=${{ secrets.EMAIL_PASS }}
-        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        cat > ./backend-php/.env << 'ENVEOF'
+        DB_HOST=localhost
+        DB_USER=u177524058_Chemzwap
+        DB_PASSWORD=Chemzwap@123
+        DB_NAME=u177524058_Chemzwap
+        JWT_SECRET=chemzwap_secret_key_2024
+        EMAIL_USER=swapchemicals@gmail.com
+        EMAIL_PASS=rvsq zyhf qmtj apqb
+        ADMIN_EMAIL=swapchemicals@gmail.com
         API_URL=https://www.chemzwap.com/api
         APP_ENV=production
         DISPLAY_ERRORS=0
         ALLOWED_ORIGINS=https://www.chemzwap.com
-        EOF
+        ENVEOF
 
     # Deploy Backend PHP to public_html/api
     - name: Deploy Backend PHP to Hostinger
