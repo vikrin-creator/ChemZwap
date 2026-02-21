@@ -1,6 +1,10 @@
 <?php
 // Handle CORS - Allow specific origins when using credentials
 $allowed_origins = [
+    // Production
+    'https://www.chemzwap.com',
+    'https://chemzwap.com',
+    // Development
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',

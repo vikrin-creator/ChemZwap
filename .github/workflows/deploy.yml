@@ -54,7 +54,25 @@ jobs:
       working-directory: ./backend-php
       run: |
         composer install --no-dev --optimize-autoloader --no-interaction
-        
+
+    # Create .env file from GitHub Secrets (never commit .env to repo)
+    - name: Create backend .env file
+      run: |
+        cat > ./backend-php/.env << 'EOF'
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_USER=${{ secrets.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DB_NAME=${{ secrets.DB_NAME }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        EMAIL_USER=${{ secrets.EMAIL_USER }}
+        EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        API_URL=https://www.chemzwap.com/api
+        APP_ENV=production
+        DISPLAY_ERRORS=0
+        ALLOWED_ORIGINS=https://www.chemzwap.com
+        EOF
+
     # Deploy Backend PHP to public_html/api
     - name: Deploy Backend PHP to Hostinger
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -71,3 +89,4 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
+          **/vendor/**
