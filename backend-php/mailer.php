@@ -19,6 +19,10 @@ class Mailer {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
+            // Set timeouts to avoid hanging the request
+            $mail->Timeout = 10;      // 10 second connection timeout
+            $mail->SMTPKeepAlive = false;
+
             // Recipients
             $mail->setFrom(EMAIL_USER, 'ChemZwap Admin');
             $mail->addAddress($to);

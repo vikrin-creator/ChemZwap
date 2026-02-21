@@ -272,6 +272,7 @@ if ($method === 'PUT' && $parts[0] === 'auth' && $parts[1] === 'change-password'
 
 // Route: POST /api/auth/forgot-password
 if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password') {
+    set_time_limit(30); // Prevent PHP from hanging more than 30 seconds
     try {
         $email = $input['email'] ?? '';
 
@@ -296,10 +297,32 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
         $resetCode = sprintf("%06d", mt_rand(0, 999999));
         $expiry = date('Y-m-d H:i:s', time() + (15 * 60)); // 15 minutes
 
-        $db->query(
-            'UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
-            [$resetCode, $expiry, $user['id']]
-        );
+        // Ensure reset_code columns exist (auto-add if missing)
+        try {
+            $conn = $db->getConnection();
+            $check = $conn->query("SHOW COLUMNS FROM users LIKE 'reset_code'");
+            if ($check->rowCount() === 0) {
+                $conn->exec("ALTER TABLE users ADD COLUMN reset_code VARCHAR(6) NULL DEFAULT NULL");
+            }
+            $check2 = $conn->query("SHOW COLUMNS FROM users LIKE 'reset_code_expires'");
+            if ($check2->rowCount() === 0) {
+                $conn->exec("ALTER TABLE users ADD COLUMN reset_code_expires DATETIME NULL DEFAULT NULL");
+            }
+        } catch (Exception $colErr) {
+            error_log("Column check error: " . $colErr->getMessage());
+        }
+
+        try {
+            $db->query(
+                'UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
+                [$resetCode, $expiry, $user['id']]
+            );
+        } catch (Exception $dbErr) {
+            error_log("DB update error: " . $dbErr->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $dbErr->getMessage()]);
+            exit;
+        }
 
         $displayName = $user['full_name'] ?: $user['username'];
 
@@ -325,16 +348,18 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'forgot-password
         if ($emailResult['success']) {
             echo json_encode(['success' => true, 'message' => 'Reset code sent to your email']);
         } else {
+            // Email failed but code was saved - tell user to check spam or retry
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to send reset email']);
+            echo json_encode(['success' => false, 'message' => 'Failed to send reset email. Please try again. (' . $emailResult['message'] . ')']);
         }
     } catch (Exception $e) {
         error_log("Forgot password error: " . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
     }
     exit;
 }
+
 
 // Route: POST /api/auth/reset-password
 if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'reset-password') {
