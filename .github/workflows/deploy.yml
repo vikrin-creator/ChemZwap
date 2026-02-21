@@ -18,7 +18,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install dependencies
       working-directory: ./frontend
@@ -65,14 +64,14 @@ jobs:
     - name: Create backend .env file
       run: |
         cat > ./backend-php/.env << 'ENVEOF'
-        DB_HOST=localhost
+        DB_HOST=srv2124.hstgr.io
         DB_USER=u177524058_Chemzwap
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DB_PASSWORD=Chemzwap@123
         DB_NAME=u177524058_Chemzwap
         JWT_SECRET=chemzwap_secret_key_2024
-        EMAIL_USER=${{ secrets.EMAIL_USER }}
-        EMAIL_PASS=${{ secrets.EMAIL_PASS }}
-        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        EMAIL_USER=swapchemicals@gmail.com
+        EMAIL_PASS=rvsq zyhf qmtj apqb
+        ADMIN_EMAIL=swapchemicals@gmail.com
         API_URL=https://www.chemzwap.com/api
         APP_ENV=production
         DISPLAY_ERRORS=0
