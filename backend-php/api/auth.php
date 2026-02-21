@@ -41,14 +41,6 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
             exit;
         }
 
-        // Only allow specific admin email to login to admin panel
-        $adminEmail = 'sainithin95054@gmail.com';
-        if (strtolower($email) !== strtolower($adminEmail)) {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'Access denied. Admin login only.']);
-            exit;
-        }
-
         $token = Auth::generateToken($user['id'], $user['email'], $user['role']);
 
         echo json_encode([
