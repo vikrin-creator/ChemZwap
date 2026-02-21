@@ -77,8 +77,8 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'register') {
         $mobile = $input['mobile'] ?? '';
         $role = 'user'; // Always register as user
 
-        // Use full_name as username if no username provided
-        $username = $input['username'] ?? $fullName;
+        // Use email as username - it's always unique (avoids duplicate username constraint)
+        $username = $email;
 
         if (empty($fullName) || empty($email) || empty($password)) {
             http_response_code(400);
