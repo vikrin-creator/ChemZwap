@@ -60,6 +60,29 @@ try {
             // Column might already exist
         }
     }
+
+    // Add reset_code column if it doesn't exist (needed for forgot-password)
+    try {
+        $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'reset_code'");
+        if ($checkCol->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_code VARCHAR(6) NULL DEFAULT NULL");
+            $migrations_run[] = "Added reset_code to users table";
+        }
+    } catch (Exception $e) {
+        $migrations_run[] = "reset_code error: " . $e->getMessage();
+    }
+
+    // Add reset_code_expires column if it doesn't exist (needed for forgot-password)
+    try {
+        $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'reset_code_expires'");
+        if ($checkCol->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_code_expires DATETIME NULL DEFAULT NULL");
+            $migrations_run[] = "Added reset_code_expires to users table";
+        }
+    } catch (Exception $e) {
+        $migrations_run[] = "reset_code_expires error: " . $e->getMessage();
+    }
+
     
     // Create products table if not exists
     $productsSql = "CREATE TABLE IF NOT EXISTS products (

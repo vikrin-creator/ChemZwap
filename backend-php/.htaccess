@@ -1,9 +1,20 @@
-RewriteEngine On
-RewriteBase /api/
+Options -Indexes
 
-# Don't rewrite files or directories
+RewriteEngine On
+RewriteBase /
+
+# Handle CORS preflight OPTIONS requests immediately
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Don't rewrite actual files or directories (images, css, etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Rewrite all requests to index.php (we're already in /api/ folder)
+# Route /api/* requests to index.php with the route as a query parameter
+RewriteRule ^api/(.*)$ index.php?route=$1 [QSA,L]
+
+# Route everything else to index.php as well (fallback)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
