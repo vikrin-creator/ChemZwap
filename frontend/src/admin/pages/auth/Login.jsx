@@ -16,7 +16,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await api.auth.login(formData);
+            const response = await api.auth.login({ ...formData, isAdmin: true });
 
             if (response.data.token) {
                 localStorage.setItem('adminToken', response.data.token);
