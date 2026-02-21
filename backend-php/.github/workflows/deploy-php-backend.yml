@@ -1,3 +1,5 @@
+# DEPRECATED: Use root /.github/workflows/deploy.yml instead
+# This file is kept for reference only
 name: Deploy PHP Backend to Hostinger
 
 on:

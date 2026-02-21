@@ -28,6 +28,7 @@ jobs:
       env:
         CI: false
         GENERATE_SOURCEMAP: false
+        VITE_API_URL: https://www.chemzwap.com/api
         
     - name: Deploy to Hostinger via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5

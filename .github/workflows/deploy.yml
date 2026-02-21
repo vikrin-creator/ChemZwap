@@ -19,7 +19,6 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
         
     - name: Install dependencies
       working-directory: ./frontend
@@ -50,24 +49,30 @@ jobs:
           **/.git*/**
           **/node_modules/**
           
+    # Setup PHP
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        
     # Install PHP dependencies
     - name: Install Composer dependencies
       working-directory: ./backend-php
       run: |
         composer install --no-dev --optimize-autoloader --no-interaction
 
-    # Create .env file with hardcoded production values
+    # Create .env file with production values
     - name: Create backend .env file
       run: |
         cat > ./backend-php/.env << 'ENVEOF'
         DB_HOST=localhost
         DB_USER=u177524058_Chemzwap
-        DB_PASSWORD=Chemzwap@123
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         DB_NAME=u177524058_Chemzwap
         JWT_SECRET=chemzwap_secret_key_2024
-        EMAIL_USER=swapchemicals@gmail.com
-        EMAIL_PASS=rvsq zyhf qmtj apqb
-        ADMIN_EMAIL=swapchemicals@gmail.com
+        EMAIL_USER=${{ secrets.EMAIL_USER }}
+        EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
         API_URL=https://www.chemzwap.com/api
         APP_ENV=production
         DISPLAY_ERRORS=0
