@@ -121,8 +121,9 @@ if ($method === 'GET' && $parts[0] === 'enquiries') {
     try {
         $user = Auth::authenticate();
         
-        // Check if user is admin
-        if ($user['role'] !== 'admin') {
+        // Check if user is admin (by role or by admin email)
+        $adminEmail = 'swapchemicals@gmail.com';
+        if ($user['role'] !== 'admin' && strtolower($user['email']) !== strtolower($adminEmail)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'message' => 'Admin access required']);
             exit;
@@ -143,7 +144,8 @@ if ($method === 'PUT' && $parts[0] === 'enquiries' && isset($parts[1]) && isset(
     try {
         $user = Auth::authenticate();
         
-        if ($user['role'] !== 'admin') {
+        $adminEmail = 'swapchemicals@gmail.com';
+        if ($user['role'] !== 'admin' && strtolower($user['email']) !== strtolower($adminEmail)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'message' => 'Admin access required']);
             exit;
@@ -177,7 +179,8 @@ if ($method === 'DELETE' && $parts[0] === 'enquiries' && isset($parts[1])) {
     try {
         $user = Auth::authenticate();
         
-        if ($user['role'] !== 'admin') {
+        $adminEmail = 'swapchemicals@gmail.com';
+        if ($user['role'] !== 'admin' && strtolower($user['email']) !== strtolower($adminEmail)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'message' => 'Admin access required']);
             exit;
