@@ -8,10 +8,10 @@
 
 class EmailConfig {
     // Email Settings
-    const FROM_EMAIL = 'noreply@chemzwap.com';
+    const FROM_EMAIL = 'swapchemicals@gmail.com';
     const FROM_NAME = 'ChemZwap';
-    const REPLY_TO_EMAIL = 'info@chemzwap.com';
-    const ADMIN_EMAIL = 'sainithin95054@gmail.com'; // All contact form emails will be sent here
+    const REPLY_TO_EMAIL = 'swapchemicals@gmail.com';
+    const ADMIN_EMAIL = 'swapchemicals@gmail.com'; // All contact form emails will be sent here
     
     // SMTP Configuration
     // Option 1: Use Hostinger SMTP (Recommended if you have Hostinger hosting)
@@ -27,8 +27,8 @@ class EmailConfig {
     const SMTP_SECURE = 'tls'; // 'tls' or 'ssl'
     
     // SMTP Authentication - Gmail Credentials
-    const SMTP_USERNAME = 'sainithin95054@gmail.com';
-    const SMTP_PASSWORD = 'mpsxwgsquhvehygs'; // Gmail App Password
+    const SMTP_USERNAME = 'swapchemicals@gmail.com';
+    const SMTP_PASSWORD = 'rvsq zyhf qmtj apqb'; // Gmail App Password
     
     // Email Templates
     const ENABLE_HTML = true;
