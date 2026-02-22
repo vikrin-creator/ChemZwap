@@ -43,6 +43,7 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
 
         // Check admin-only access if this is an admin login request
         $isAdminLogin = !empty($input['isAdmin']);
+        $tokenRole = $user['role'];
         if ($isAdminLogin) {
             $adminEmail = 'swapchemicals@gmail.com';
             if (strtolower($email) !== strtolower($adminEmail)) {
@@ -50,9 +51,14 @@ if ($method === 'POST' && $parts[0] === 'auth' && $parts[1] === 'login') {
                 echo json_encode(['success' => false, 'message' => 'Access denied. Admin login only.']);
                 exit;
             }
+            // Force admin role for the admin login — also update DB if needed
+            $tokenRole = 'admin';
+            if ($user['role'] !== 'admin') {
+                $db->query('UPDATE users SET role = ? WHERE id = ?', ['admin', $user['id']]);
+            }
         }
 
-        $token = Auth::generateToken($user['id'], $user['email'], $user['role']);
+        $token = Auth::generateToken($user['id'], $user['email'], $tokenRole);
 
         echo json_encode([
             'success' => true,
