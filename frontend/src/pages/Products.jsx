@@ -72,7 +72,9 @@ const Products = () => {
                             einecs: p.einecs || '',
                             image: imageUrl,
                             category: p.category || '',
-                            category_id: p.category_id ? p.category_id.toString() : ''
+                            category_id: p.category_id ? p.category_id.toString() : '',
+                            extraDataTitle: p.extra_data_title || '',
+                            extraData: p.extra_data || ''
                         };
                     });
                     setProducts(mappedProducts);
@@ -254,10 +256,26 @@ const Products = () => {
                                             </div>
 
                                             {/* Einecs */}
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Einecs</span>
-                                                <span className="text-sm text-gray-900 font-mono font-medium">{product.einecs}</span>
-                                            </div>
+                                            {product.einecs && (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Einecs</span>
+                                                    <span className="text-sm text-gray-900 font-mono font-medium">{product.einecs}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Extra Data */}
+                                            {(product.extraDataTitle || product.extraData) && (
+                                                <div className="flex flex-col mt-2">
+                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                        {product.extraDataTitle || 'Extra Data'}
+                                                    </span>
+                                                    {product.extraData && (
+                                                        <span className="text-sm text-gray-900 font-medium whitespace-pre-wrap mt-1">
+                                                            {product.extraData}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Enquire Now Button */}

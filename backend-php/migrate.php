@@ -93,6 +93,8 @@ try {
         einecs VARCHAR(50),
         category VARCHAR(255),
         category_id INT,
+        extra_data_title VARCHAR(255),
+        extra_data TEXT,
         image VARCHAR(500),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -100,6 +102,28 @@ try {
     
     $pdo->exec($productsSql);
     $tables_created[] = 'products';
+    
+    // Add extra_data column to products if it doesn't exist
+    try {
+        $checkCol = $pdo->query("SHOW COLUMNS FROM products LIKE 'extra_data'");
+        if ($checkCol->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data TEXT AFTER category_id");
+            $migrations_run[] = "Added extra_data to products table";
+        }
+    } catch (Exception $e) {
+        $migrations_run[] = "extra_data error: " . $e->getMessage();
+    }
+
+    // Add extra_data_title column to products if it doesn't exist
+    try {
+        $checkCol = $pdo->query("SHOW COLUMNS FROM products LIKE 'extra_data_title'");
+        if ($checkCol->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data_title VARCHAR(255) AFTER category_id");
+            $migrations_run[] = "Added extra_data_title to products table";
+        }
+    } catch (Exception $e) {
+        $migrations_run[] = "extra_data_title error: " . $e->getMessage();
+    }
     
     // Create enquiries table if not exists (with user_id)
     $enquiriesSql = "CREATE TABLE IF NOT EXISTS enquiries (

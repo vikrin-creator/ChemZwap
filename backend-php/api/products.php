@@ -59,6 +59,8 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
         $casNumber = null;
         $einecs = null;
         $category = null;
+        $extraDataTitle = null;
+        $extraData = null;
         $imagePath = null;
 
         // Check if it's FormData (multipart/form-data) or JSON
@@ -70,6 +72,8 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
             $casNumber = $_POST['casNumber'] ?? $_POST['cas_number'] ?? null;
             $einecs = $_POST['einecs'] ?? null;
             $category = $_POST['category'] ?? null;
+            $extraDataTitle = $_POST['extraDataTitle'] ?? $_POST['extra_data_title'] ?? null;
+            $extraData = $_POST['extraData'] ?? $_POST['extra_data'] ?? null;
             
             // Handle file upload if present
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -103,6 +107,7 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
             $casNumber = $input['casNumber'] ?? $input['cas_number'] ?? null;
             $einecs = $input['einecs'] ?? null;
             $category = $input['category'] ?? null;
+            $extraData = $input['extraData'] ?? $input['extra_data'] ?? null;
         }
 
         if (empty($name)) {
@@ -112,8 +117,8 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
         }
 
         $db->query(
-            'INSERT INTO products (product_name, synonyms, cas_number, einecs, category, image) VALUES (?, ?, ?, ?, ?, ?)',
-            [$name, $synonyms, $casNumber, $einecs, $category, $imagePath]
+            'INSERT INTO products (product_name, synonyms, cas_number, einecs, category, extra_data_title, extra_data, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [$name, $synonyms, $casNumber, $einecs, $category, $extraDataTitle, $extraData, $imagePath]
         );
 
         $productId = $db->lastInsertId();
@@ -144,6 +149,8 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
         $casNumber = $_POST['casNumber'] ?? $_POST['cas_number'] ?? null;
         $einecs = $_POST['einecs'] ?? null;
         $category = $_POST['category'] ?? null;
+        $extraDataTitle = $_POST['extraDataTitle'] ?? $_POST['extra_data_title'] ?? null;
+        $extraData = $_POST['extraData'] ?? $_POST['extra_data'] ?? null;
 
         // Fallback to JSON input if $_POST is empty (for non-FormData requests)
         if (empty($name) && $input) {
@@ -152,6 +159,7 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
             $casNumber = $input['casNumber'] ?? $input['cas_number'] ?? null;
             $einecs = $input['einecs'] ?? null;
             $category = $input['category'] ?? null;
+            $extraData = $input['extraData'] ?? $input['extra_data'] ?? null;
         }
 
         error_log("PUT /api/products/$productId - Name: $name, Synonyms: $synonyms, CAS: $casNumber");
@@ -163,8 +171,8 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
         }
 
         $result = $db->query(
-            'UPDATE products SET product_name = ?, synonyms = ?, cas_number = ?, einecs = ?, category = ? WHERE id = ?',
-            [$name, $synonyms, $casNumber, $einecs, $category, $productId]
+            'UPDATE products SET product_name = ?, synonyms = ?, cas_number = ?, einecs = ?, category = ?, extra_data_title = ?, extra_data = ? WHERE id = ?',
+            [$name, $synonyms, $casNumber, $einecs, $category, $extraDataTitle, $extraData, $productId]
         );
 
         echo json_encode([

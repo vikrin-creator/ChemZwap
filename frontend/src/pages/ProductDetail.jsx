@@ -60,6 +60,8 @@ const ProductDetail = () => {
                         synonyms: data.data.synonyms || '',
                         casNumber: data.data.cas_number || '',
                         einecs: data.data.einecs || '',
+                        extraDataTitle: data.data.extra_data_title || '',
+                        extraData: data.data.extra_data || '',
                         image: imageUrl,
                     });
                 } else {
@@ -70,6 +72,8 @@ const ProductDetail = () => {
                         synonyms: '',
                         casNumber: '',
                         einecs: '',
+                        extraDataTitle: '',
+                        extraData: '',
                         image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
                     });
                 }
@@ -81,6 +85,8 @@ const ProductDetail = () => {
                     synonyms: '',
                     casNumber: '',
                     einecs: '',
+                    extraDataTitle: '',
+                    extraData: '',
                     image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
                 });
             }
@@ -226,12 +232,24 @@ const ProductDetail = () => {
 
                         {/* EINECS - only shown if has value */}
                         {hasValue(product.einecs) && (
-                            <div className="flex flex-col sm:flex-row sm:items-center pb-2">
+                            <div className={`flex flex-col sm:flex-row sm:items-center ${hasValue(product.extraData) ? 'border-b border-gray-200 pb-4' : 'pb-2'}`}>
                                 <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
                                     EINECS
                                 </div>
                                 <div className="flex-1 text-gray-900 font-mono">
                                     {product.einecs}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Extra Data - only shown if has value */}
+                        {(hasValue(product.extraDataTitle) || hasValue(product.extraData)) && (
+                            <div className="flex flex-col sm:flex-row sm:items-start pb-2">
+                                <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
+                                    {product.extraDataTitle || 'Extra Data'}
+                                </div>
+                                <div className="flex-1 text-gray-900 whitespace-pre-wrap">
+                                    {product.extraData}
                                 </div>
                             </div>
                         )}

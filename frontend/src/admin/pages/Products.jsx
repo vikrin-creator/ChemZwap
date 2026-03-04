@@ -26,7 +26,9 @@ const Products = () => {
         synonyms: '',
         casNumber: '',
         einecs: '',
-        category: ''
+        category: '',
+        extraDataTitle: '',
+        extraData: ''
     });
 
     useEffect(() => {
@@ -73,6 +75,8 @@ const Products = () => {
             submitData.append('casNumber', formData.casNumber);
             submitData.append('einecs', formData.einecs);
             submitData.append('category', formData.category);
+            submitData.append('extraDataTitle', formData.extraDataTitle);
+            submitData.append('extraData', formData.extraData);
             if (imageFile) {
                 submitData.append('image', imageFile);
             }
@@ -117,7 +121,9 @@ const Products = () => {
             synonyms: product.synonyms || '',
             casNumber: product.cas_number || '',
             einecs: product.einecs || '',
-            category: product.category || ''
+            category: product.category || '',
+            extraDataTitle: product.extra_data_title || '',
+            extraData: product.extra_data || ''
         });
         setImageFile(null);
         setImagePreview(product.image ? `${API_URL}${product.image}` : '');
@@ -149,7 +155,7 @@ const Products = () => {
     };
 
     const resetForm = () => {
-        setFormData({ productName: '', synonyms: '', casNumber: '', einecs: '', category: '' });
+        setFormData({ productName: '', synonyms: '', casNumber: '', einecs: '', category: '', extraDataTitle: '', extraData: '' });
         setImageFile(null);
         setImagePreview('');
     };
@@ -320,6 +326,31 @@ const Products = () => {
                                         <option key={cat.id} value={cat.name}>{cat.name}</option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="pt-4 border-t border-gray-700">
+                                <h3 className="text-lg font-semibold text-white mb-4">Upload Extra Data</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
+                                        <input
+                                            type="text"
+                                            value={formData.extraDataTitle}
+                                            onChange={(e) => setFormData({ ...formData, extraDataTitle: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
+                                            placeholder="e.g., Key Specifications"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Paragraph</label>
+                                        <textarea
+                                            value={formData.extraData}
+                                            onChange={(e) => setFormData({ ...formData, extraData: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
+                                            placeholder="e.g., Detailed description of quality and quantity..."
+                                            rows="3"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button
