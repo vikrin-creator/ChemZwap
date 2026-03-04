@@ -107,7 +107,7 @@ try {
     try {
         $checkCol = $pdo->query("SHOW COLUMNS FROM products LIKE 'extra_data'");
         if ($checkCol->rowCount() === 0) {
-            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data TEXT AFTER category_id");
+            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data TEXT AFTER category");
             $migrations_run[] = "Added extra_data to products table";
         }
     } catch (Exception $e) {
@@ -118,7 +118,7 @@ try {
     try {
         $checkCol = $pdo->query("SHOW COLUMNS FROM products LIKE 'extra_data_title'");
         if ($checkCol->rowCount() === 0) {
-            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data_title VARCHAR(255) AFTER category_id");
+            $pdo->exec("ALTER TABLE products ADD COLUMN extra_data_title VARCHAR(255) AFTER category");
             $migrations_run[] = "Added extra_data_title to products table";
         }
     } catch (Exception $e) {
