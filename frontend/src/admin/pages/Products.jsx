@@ -328,7 +328,7 @@ const Products = () => {
                                 </select>
                             </div>
                             <div className="pt-4 border-t border-gray-700">
-                                <h3 className="text-lg font-semibold text-white mb-4">Upload Extra Data</h3>
+                                <h3 className="text-lg font-semibold text-white mb-4">Synonyms other</h3>
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>

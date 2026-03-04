@@ -245,9 +245,11 @@ const ProductDetail = () => {
                         {/* Extra Data - only shown if has value */}
                         {(hasValue(product.extraDataTitle) || hasValue(product.extraData)) && (
                             <div className="flex flex-col sm:flex-row sm:items-start pb-2">
-                                <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
-                                    {product.extraDataTitle || 'Extra Data'}
-                                </div>
+                                {hasValue(product.extraDataTitle) && (
+                                    <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
+                                        {product.extraDataTitle}
+                                    </div>
+                                )}
                                 <div className="flex-1 text-gray-900 whitespace-pre-wrap">
                                     {product.extraData}
                                 </div>
