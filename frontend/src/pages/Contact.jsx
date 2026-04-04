@@ -78,15 +78,19 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                {/* Response Time */}
+                                {/* Office Address */}
                                 <div className="flex items-start space-x-4">
                                     <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl">
                                         <MapPin className="h-6 w-6 text-white" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Response Time</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Office Address</h3>
                                         <p className="text-gray-600">
-                                            We typically respond within 24 hours during business days.
+                                            ChemZwap Private Limited<br />
+                                            Awfis - Sita City One<br />
+                                            3rd Floor, Sita City One,<br />
+                                            Venkatarambagh,<br />
+                                            Begumpet, Hyderabad - 500016
                                         </p>
                                     </div>
                                 </div>

@@ -60,6 +60,16 @@ const Footer = () => {
                                     info@chemzwap.com
                                 </a>
                             </li>
+                            <li className="flex items-start space-x-3">
+                                <MapPin className="h-5 w-5 text-primary-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-gray-300">
+                                    ChemZwap Private Limited<br />
+                                    Awfis - Sita City One<br />
+                                    3rd Floor, Sita City One,<br />
+                                    Venkatarambagh,<br />
+                                    Begumpet, Hyderabad - 500016
+                                </span>
+                            </li>
                         </ul>
                     </div>
 
