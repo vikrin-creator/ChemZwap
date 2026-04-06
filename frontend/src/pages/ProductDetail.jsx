@@ -184,13 +184,12 @@ const ProductDetail = () => {
                     transition={{ duration: 0.5 }}
                     className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8 border border-gray-100"
                 >
-                    <div className="relative h-[400px] bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative h-[400px] bg-white flex items-center justify-center p-8">
                         <img
                             src={product.image}
                             alt={product.productName}
-                            className="w-full h-full object-cover"
+                            className="max-w-full max-h-full object-contain"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                     </div>
                 </motion.div>
 

@@ -303,7 +303,9 @@ const Products = () => {
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Product Image</label>
                                 <div className="space-y-2">
                                     {imagePreview && (
-                                        <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg border border-gray-600" />
+                                        <div className="w-32 h-32 bg-gray-800 rounded-lg border border-gray-600 flex items-center justify-center p-2">
+                                            <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain" />
+                                        </div>
                                     )}
                                     <input
                                         type="file"

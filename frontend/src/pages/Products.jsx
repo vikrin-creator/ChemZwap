@@ -222,11 +222,11 @@ const Products = () => {
                                 {/* Product Card */}
                                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-100">
                                     {/* Image Section */}
-                                    <div className="relative h-52 overflow-hidden">
+                                    <div className="relative h-52 overflow-hidden bg-gray-50 flex items-center justify-center p-4">
                                         <img
                                             src={product.image}
                                             alt={product.productName}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
                                             onError={(e) => {
                                                 e.target.onerror = null; // Prevent infinite loop
                                                 e.target.src = 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=800&h=600&fit=crop';
