@@ -73,8 +73,20 @@ const Products = () => {
                             image: imageUrl,
                             category: p.category || '',
                             category_id: p.category_id ? p.category_id.toString() : '',
-                            extraDataTitle: p.extra_data_title || '',
-                            extraData: p.extra_data || ''
+                            extraSections: (() => {
+                                try {
+                                    const parsed = JSON.parse(p.extra_data);
+                                    if (Array.isArray(parsed) && parsed.length > 0) {
+                                        return parsed;
+                                    }
+                                } catch (e) {
+                                    // Not JSON
+                                }
+                                return [{
+                                    title: p.extra_data_title || '',
+                                    content: p.extra_data || ''
+                                }];
+                            })()
                         };
                     });
                     setProducts(mappedProducts);
@@ -263,18 +275,20 @@ const Products = () => {
                                                 </div>
                                             )}
 
-                                            {/* Extra Data */}
-                                            {(product.extraDataTitle || product.extraData) && (
-                                                <div className="flex flex-col mt-2">
-                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                                        {product.extraDataTitle || 'Extra Data'}
-                                                    </span>
-                                                    {product.extraData && (
-                                                        <span className="text-sm text-gray-900 font-medium whitespace-pre-wrap mt-1">
-                                                            {product.extraData}
+                                            {/* Extra Data - show first section */}
+                                            {product.extraSections && product.extraSections.length > 0 && (
+                                                (product.extraSections[0].title || product.extraSections[0].content) && (
+                                                    <div className="flex flex-col mt-2">
+                                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                            {product.extraSections[0].title || 'Extra Data'}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                        {product.extraSections[0].content && (
+                                                            <span className="text-sm text-gray-900 font-medium line-clamp-1 mt-1">
+                                                                {product.extraSections[0].content}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )
                                             )}
                                         </div>
 

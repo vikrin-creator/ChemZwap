@@ -28,16 +28,30 @@ if ($method === 'GET' && $parts[0] === 'products') {
                 [$parts[1]]
             );
 
-            if (!$product) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Product not found']);
-                exit;
-            }
+                if (!$product) {
+                    http_response_code(404);
+                    echo json_encode(['success' => false, 'message' => 'Product not found']);
+                    exit;
+                }
 
-            echo json_encode(['success' => true, 'data' => $product]);
+                // Fetch extra sections
+                $product['extra_sections'] = $db->fetchAll(
+                    'SELECT title, content FROM product_extra_sections WHERE product_id = ? ORDER BY id ASC',
+                    [$product['id']]
+                );
+
+                echo json_encode(['success' => true, 'data' => $product]);
         } else {
             // Get all products
             $products = $db->fetchAll('SELECT * FROM products ORDER BY created_at DESC');
+            
+            // Fetch extra sections for each product
+            foreach ($products as &$p) {
+                $p['extra_sections'] = $db->fetchAll(
+                    'SELECT title, content FROM product_extra_sections WHERE product_id = ? ORDER BY id ASC',
+                    [$p['id']]
+                );
+            }
             echo json_encode(['success' => true, 'data' => $products]);
         }
     } catch (Exception $e) {
@@ -123,6 +137,21 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
 
         $productId = $db->lastInsertId();
 
+        // Insert extra sections if provided
+        if (!empty($extraData)) {
+            $sections = json_decode($extraData, true);
+            if (is_array($sections)) {
+                foreach ($sections as $section) {
+                    if (!empty($section['title']) || !empty($section['content'])) {
+                        $db->query(
+                            'INSERT INTO product_extra_sections (product_id, title, content) VALUES (?, ?, ?)',
+                            [$productId, $section['title'] ?? '', $section['content'] ?? '']
+                        );
+                    }
+                }
+            }
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'Product created successfully',
@@ -174,6 +203,24 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
             'UPDATE products SET product_name = ?, synonyms = ?, cas_number = ?, einecs = ?, category = ?, extra_data_title = ?, extra_data = ? WHERE id = ?',
             [$name, $synonyms, $casNumber, $einecs, $category, $extraDataTitle, $extraData, $productId]
         );
+
+        // Sync extra sections
+        // Simplest way: Delete existing and re-insert
+        $db->query('DELETE FROM product_extra_sections WHERE product_id = ?', [$productId]);
+        
+        if (!empty($extraData)) {
+            $sections = json_decode($extraData, true);
+            if (is_array($sections)) {
+                foreach ($sections as $section) {
+                    if (!empty($section['title']) || !empty($section['content'])) {
+                        $db->query(
+                            'INSERT INTO product_extra_sections (product_id, title, content) VALUES (?, ?, ?)',
+                            [$productId, $section['title'] ?? '', $section['content'] ?? '']
+                        );
+                    }
+                }
+            }
+        }
 
         echo json_encode([
             'success' => true,

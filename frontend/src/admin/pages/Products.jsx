@@ -27,8 +27,7 @@ const Products = () => {
         casNumber: '',
         einecs: '',
         category: '',
-        extraDataTitle: '',
-        extraData: ''
+        extraSections: [{ title: '', content: '' }]
     });
 
     useEffect(() => {
@@ -75,8 +74,13 @@ const Products = () => {
             submitData.append('casNumber', formData.casNumber);
             submitData.append('einecs', formData.einecs);
             submitData.append('category', formData.category);
-            submitData.append('extraDataTitle', formData.extraDataTitle);
-            submitData.append('extraData', formData.extraData);
+
+            // Serialize extra sections to JSON
+            const extraData = JSON.stringify(formData.extraSections);
+            const extraDataTitle = formData.extraSections[0]?.title || '';
+            
+            submitData.append('extra_data_title', extraDataTitle);
+            submitData.append('extra_data', extraData);
             if (imageFile) {
                 submitData.append('image', imageFile);
             }
@@ -122,8 +126,22 @@ const Products = () => {
             casNumber: product.cas_number || '',
             einecs: product.einecs || '',
             category: product.category || '',
-            extraDataTitle: product.extra_data_title || '',
-            extraData: product.extra_data || ''
+            extraSections: (() => {
+                try {
+                    // Try to parse the extra_data as JSON
+                    const parsed = JSON.parse(product.extra_data);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
+                } catch (e) {
+                    // Not JSON or empty, use legacy fields
+                }
+                // Fallback to legacy format or single empty section
+                return [{ 
+                    title: product.extra_data_title || '', 
+                    content: product.extra_data || '' 
+                }];
+            })()
         });
         setImageFile(null);
         setImagePreview(product.image ? `${API_URL}${product.image}` : '');
@@ -155,9 +173,40 @@ const Products = () => {
     };
 
     const resetForm = () => {
-        setFormData({ productName: '', synonyms: '', casNumber: '', einecs: '', category: '', extraDataTitle: '', extraData: '' });
+        setFormData({ 
+            productName: '', 
+            synonyms: '', 
+            casNumber: '', 
+            einecs: '', 
+            category: '', 
+            extraSections: [{ title: '', content: '' }] 
+        });
         setImageFile(null);
         setImagePreview('');
+    };
+
+    const handleAddExtraSection = () => {
+        setFormData({
+            ...formData,
+            extraSections: [...formData.extraSections, { title: '', content: '' }]
+        });
+    };
+
+    const handleRemoveExtraSection = (index) => {
+        const newSections = formData.extraSections.filter((_, i) => i !== index);
+        setFormData({
+            ...formData,
+            extraSections: newSections.length > 0 ? newSections : [{ title: '', content: '' }]
+        });
+    };
+
+    const handleExtraSectionChange = (index, field, value) => {
+        const newSections = [...formData.extraSections];
+        newSections[index][field] = value;
+        setFormData({
+            ...formData,
+            extraSections: newSections
+        });
     };
 
     const openAddModal = () => {
@@ -330,28 +379,51 @@ const Products = () => {
                                 </select>
                             </div>
                             <div className="pt-4 border-t border-gray-700">
-                                <h3 className="text-lg font-semibold text-white mb-4">Synonyms other</h3>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
-                                        <input
-                                            type="text"
-                                            value={formData.extraDataTitle}
-                                            onChange={(e) => setFormData({ ...formData, extraDataTitle: e.target.value })}
-                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
-                                            placeholder="e.g., Key Specifications"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-1">Paragraph</label>
-                                        <textarea
-                                            value={formData.extraData}
-                                            onChange={(e) => setFormData({ ...formData, extraData: e.target.value })}
-                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
-                                            placeholder="e.g., Detailed description of quality and quantity..."
-                                            rows="3"
-                                        />
-                                    </div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-white">Synonyms other</h3>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddExtraSection}
+                                        className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 text-sm bg-cyan-400/10 px-2 py-1 rounded-md"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Section
+                                    </button>
+                                </div>
+                                <div className="space-y-6">
+                                    {formData.extraSections.map((section, index) => (
+                                        <div key={index} className="space-y-3 p-3 bg-gray-800/30 rounded-lg relative border border-gray-800">
+                                            {formData.extraSections.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveExtraSection(index)}
+                                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-lg"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
+                                            )}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                                                <input
+                                                    type="text"
+                                                    value={section.title}
+                                                    onChange={(e) => handleExtraSectionChange(index, 'title', e.target.value)}
+                                                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
+                                                    placeholder="e.g., Key Specifications"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-400 mb-1">Paragraph</label>
+                                                <textarea
+                                                    value={section.content}
+                                                    onChange={(e) => handleExtraSectionChange(index, 'content', e.target.value)}
+                                                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
+                                                    placeholder="e.g., Detailed description of quality and quantity..."
+                                                    rows="2"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-4">

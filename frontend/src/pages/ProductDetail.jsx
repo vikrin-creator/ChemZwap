@@ -61,7 +61,20 @@ const ProductDetail = () => {
                         casNumber: data.data.cas_number || '',
                         einecs: data.data.einecs || '',
                         extraDataTitle: data.data.extra_data_title || '',
-                        extraData: data.data.extra_data || '',
+                        extraSections: (() => {
+                            try {
+                                const parsed = JSON.parse(data.data.extra_data);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    return parsed;
+                                }
+                            } catch (e) {
+                                // Not JSON
+                            }
+                            return [{
+                                title: data.data.extra_data_title || '',
+                                content: data.data.extra_data || ''
+                            }];
+                        })(),
                         image: imageUrl,
                     });
                 } else {
@@ -73,7 +86,7 @@ const ProductDetail = () => {
                         casNumber: '',
                         einecs: '',
                         extraDataTitle: '',
-                        extraData: '',
+                        extraSections: [],
                         image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
                     });
                 }
@@ -86,7 +99,7 @@ const ProductDetail = () => {
                     casNumber: '',
                     einecs: '',
                     extraDataTitle: '',
-                    extraData: '',
+                    extraSections: [],
                     image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
                 });
             }
@@ -241,19 +254,21 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* Extra Data - only shown if has value */}
-                        {(hasValue(product.extraDataTitle) || hasValue(product.extraData)) && (
-                            <div className="flex flex-col sm:flex-row sm:items-start pb-2">
-                                {hasValue(product.extraDataTitle) && (
-                                    <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
-                                        {product.extraDataTitle}
+                        {/* Extra Data Sections */}
+                        {product.extraSections && product.extraSections.map((section, index) => (
+                            (hasValue(section.title) || hasValue(section.content)) && (
+                                <div key={index} className="flex flex-col sm:flex-row sm:items-start pb-2 border-b border-gray-100 last:border-0 last:pb-0">
+                                    {hasValue(section.title) && (
+                                        <div className="w-full sm:w-48 font-semibold text-gray-700 mb-2 sm:mb-0">
+                                            {section.title}
+                                        </div>
+                                    )}
+                                    <div className="flex-1 text-gray-900 whitespace-pre-wrap">
+                                        {section.content}
                                     </div>
-                                )}
-                                <div className="flex-1 text-gray-900 whitespace-pre-wrap">
-                                    {product.extraData}
                                 </div>
-                            </div>
-                        )}
+                            )
+                        ))}
                     </div>
 
                     {/* Quick Enquire Button */}

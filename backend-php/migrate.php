@@ -163,6 +163,49 @@ try {
     // Fix existing image paths for products - add /api prefix if missing
     $fixProductsSql = "UPDATE products SET image = CONCAT('/api', image) WHERE image IS NOT NULL AND image NOT LIKE '/api/%' AND image LIKE '/uploads/%'";
     $pdo->exec($fixProductsSql);
+
+    // Create product_extra_sections table
+    $extraSectionsSql = "CREATE TABLE IF NOT EXISTS product_extra_sections (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        title VARCHAR(255),
+        content TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+    
+    $pdo->exec($extraSectionsSql);
+    $tables_created[] = 'product_extra_sections';
+
+    // Migrate existing extra_data to the new table if not already migrated
+    // We check if the new table is empty before migrating
+    $countSections = $pdo->query("SELECT COUNT(*) FROM product_extra_sections")->fetchColumn();
+    if ($countSections == 0) {
+        $productsToMigrate = $pdo->query("SELECT id, extra_data_title, extra_data FROM products WHERE extra_data IS NOT NULL AND extra_data != ''")->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($productsToMigrate as $p) {
+            // Check if extra_data is already JSON
+            $isJson = false;
+            if (strpos($p['extra_data'], '[{') === 0 || strpos($p['extra_data'], '{"') === 0) {
+                $decoded = json_decode($p['extra_data'], true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $isJson = true;
+                    foreach ($decoded as $sec) {
+                        $stmt = $pdo->prepare("INSERT INTO product_extra_sections (product_id, title, content) VALUES (?, ?, ?)");
+                        $stmt->execute([$p['id'], $sec['title'] ?? '', $sec['content'] ?? '']);
+                    }
+                }
+            }
+            
+            if (!$isJson) {
+                // Legacy plain text data
+                $stmt = $pdo->prepare("INSERT INTO product_extra_sections (product_id, title, content) VALUES (?, ?, ?)");
+                $stmt->execute([$p['id'], $p['extra_data_title'] ?? '', $p['extra_data']]);
+            }
+        }
+        if (count($productsToMigrate) > 0) {
+            $migrations_run[] = "Migrated existing extra_data to product_extra_sections table";
+        }
+    }
     
     echo json_encode([
         'success' => true,
