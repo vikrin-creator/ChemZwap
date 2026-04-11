@@ -30,6 +30,7 @@ function loadEnv($path) {
 loadEnv(__DIR__ . '/.env');
 
 // Database Configuration (fallback to hardcoded if .env not exists)
+if (defined('DB_DATABASE') && !defined('DB_NAME')) define('DB_NAME', DB_DATABASE);
 if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
 if (!defined('DB_USER')) define('DB_USER', 'u177524058_Chemzwap');
 if (!defined('DB_PASSWORD')) define('DB_PASSWORD', 'Chemzwap@123');
