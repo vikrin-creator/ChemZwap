@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../database.php';
 require_once __DIR__ . '/../auth.php';
+header('Content-Type: application/json');
 
 $db = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -89,10 +90,11 @@ if ($method === 'POST' && $parts[0] === 'enquiries' && !isset($parts[1])) {
             'message' => 'Enquiry submitted successfully',
             'id' => $enquiryId
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Create enquiry error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }
@@ -131,10 +133,11 @@ if ($method === 'GET' && $parts[0] === 'enquiries') {
 
         $enquiries = $db->fetchAll('SELECT * FROM enquiries ORDER BY created_at DESC');
         echo json_encode(['success' => true, 'data' => $enquiries]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Get enquiries error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }

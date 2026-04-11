@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../database.php';
+header('Content-Type: application/json');
 
 $db = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -25,10 +26,11 @@ if ($method === 'GET' && $parts[0] === 'dashboard' && $parts[1] === 'stats') {
             'contactedEnquiries' => (int)$contactedEnquiriesCount['count'],
             'closedEnquiries' => (int)$closedEnquiriesCount['count']
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Dashboard stats error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }

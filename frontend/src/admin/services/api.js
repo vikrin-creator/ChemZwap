@@ -56,9 +56,11 @@ api.interceptors.response.use(
     let errorMessage = 'An unexpected error occurred';
 
     if (status >= 500) {
-      errorMessage = 'Server error. Please try again later.';
+      errorMessage = data?.message || data?.error || 'Server error. Please try again later.';
     } else if (data?.message) {
       errorMessage = data.message;
+    } else if (data?.error) {
+       errorMessage = data.error;
     }
 
     console.error(`API Error [${status}]:`, data || error.message);

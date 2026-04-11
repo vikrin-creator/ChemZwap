@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../database.php';
 require_once __DIR__ . '/../auth.php';
+header('Content-Type: application/json');
 
 $db = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -39,10 +40,11 @@ if ($method === 'GET' && $parts[0] === 'categories') {
             $categories = $db->fetchAll('SELECT * FROM categories ORDER BY name ASC');
             echo json_encode(['success' => true, 'data' => $categories]);
         }
-    } catch (Exception $e) {
-        error_log("Get categories error: " . $e->getMessage());
+    } catch (Throwable $e) {
+        error_log("API error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }

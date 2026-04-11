@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../database.php';
 require_once __DIR__ . '/../auth.php';
+header('Content-Type: application/json');
 
 $db = Database::getInstance();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -45,19 +46,42 @@ if ($method === 'GET' && $parts[0] === 'products') {
             // Get all products
             $products = $db->fetchAll('SELECT * FROM products ORDER BY created_at DESC');
             
-            // Fetch extra sections for each product
-            foreach ($products as &$p) {
-                $p['extra_sections'] = $db->fetchAll(
-                    'SELECT title, content FROM product_extra_sections WHERE product_id = ? ORDER BY id ASC',
-                    [$p['id']]
+            if (!empty($products)) {
+                $productIds = array_map(function($p) { return $p['id']; }, $products);
+                $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+                
+                // Fetch all extra sections for these products in one query
+                $allSections = $db->fetchAll(
+                    "SELECT product_id, title, content FROM product_extra_sections WHERE product_id IN ($placeholders) ORDER BY id ASC",
+                    $productIds
                 );
+                
+                // Group sections by product_id
+                $sectionsByProduct = [];
+                foreach ($allSections as $section) {
+                    $pid = $section['product_id'];
+                    if (!isset($sectionsByProduct[$pid])) {
+                        $sectionsByProduct[$pid] = [];
+                    }
+                    $sectionsByProduct[$pid][] = [
+                        'title' => $section['title'],
+                        'content' => $section['content']
+                    ];
+                }
+                
+                // Assign sections back to products
+                foreach ($products as &$p) {
+                    $p['extra_sections'] = $sectionsByProduct[$p['id']] ?? [];
+                }
             }
+            
             echo json_encode(['success' => true, 'data' => $products]);
         }
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Get products error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }
@@ -157,10 +181,11 @@ if ($method === 'POST' && $parts[0] === 'products' && !isset($parts[1])) {
             'message' => 'Product created successfully',
             'id' => $productId
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Create product error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }
@@ -226,10 +251,11 @@ if ($method === 'PUT' && $parts[0] === 'products' && isset($parts[1])) {
             'success' => true,
             'message' => 'Product updated successfully'
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Update product error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }
@@ -244,10 +270,11 @@ if ($method === 'DELETE' && $parts[0] === 'products' && isset($parts[1])) {
         $db->query('DELETE FROM products WHERE id = ?', [$productId]);
 
         echo json_encode(['success' => true, 'message' => 'Product deleted successfully']);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Delete product error: " . $e->getMessage());
+        header('Content-Type: application/json');
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Server error']);
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage(), 'error_detail' => $e->getTraceAsString()]);
     }
     exit;
 }
