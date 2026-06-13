@@ -66,7 +66,7 @@ jobs:
         cat > ./backend-php/.env << 'ENVEOF'
         DB_HOST=srv2124.hstgr.io
         DB_USER=u177524058_Chemzwap
-        DB_PASSWORD=Chemzwap@123
+        DB_PASSWORD=3.&av9olrZrb)VRb+rO/
         DB_NAME=u177524058_Chemzwap
         JWT_SECRET=chemzwap_super_secret_jwt_key_2024_hostinger_prod
         EMAIL_USER=swapchemicals@gmail.com
