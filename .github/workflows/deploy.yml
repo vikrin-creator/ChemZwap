@@ -40,7 +40,7 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./frontend/dist/
         server-dir: /public_html/
-        protocol: ftp
+        protocol: ftps
         port: 21
         timeout: 600000
         exclude: |
@@ -87,7 +87,7 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./backend-php/
         server-dir: /public_html/api/
-        protocol: ftp
+        protocol: ftps
         port: 21
         timeout: 600000
         exclude: |
