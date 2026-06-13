@@ -1,5 +1,11 @@
 Options -Indexes
 
+# Block access to hidden files like .env
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
 RewriteEngine On
 RewriteBase /api/
 
