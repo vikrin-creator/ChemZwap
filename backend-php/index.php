@@ -11,12 +11,16 @@ if (isset($_GET['route'])) {
 } else {
     // Parse from URI for PHP built-in server
     $route = parse_url($requestUri, PHP_URL_PATH);
-    $route = trim($route, '/');
-    
-    // Remove 'api/' prefix if present
-    if (strpos($route, 'api/') === 0) {
-        $route = substr($route, 4);
-    }
+}
+
+// Normalize route (remove leading/trailing slashes, replace multiple slashes with single)
+$route = trim($route, '/');
+$route = preg_replace('#/+#', '/', $route);
+
+// Remove 'api/' prefix if present
+if (strpos($route, 'api/') === 0) {
+    $route = substr($route, 4);
+    $route = ltrim($route, '/');
 }
 
 // Set route in $_GET for API handlers
